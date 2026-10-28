@@ -1,0 +1,17 @@
+{
+  "L1-IMG_selftest.jpg": {
+    "sha256": "841ebfdeff6f682e748a9196f88dec69bfb2d0cd8150c9e4e09b73b40b4d109f",
+    "md5": "c299389a69536b1c2a7595784bc68c8d",
+    "bytes": 14128
+  },
+  "L1-DOC_selftest.pdf": {
+    "sha256": "07abda698a6064a8a199d3580e0809b07b1320b4cb533522ca4e0f9e536d4719",
+    "md5": "7c475b38e8cfcc09753d8c0c8dde9050",
+    "bytes": 2012
+  },
+  "L1-DOC_selftest.docx": {
+    "sha256": "b20a6edb1200ab05234b88efdcddc405b46e864d6091b752f569cc3f0ca11163",
+    "md5": "10b0466e9f03f488dce086ae89a01470",
+    "bytes": 36541
+  }
+}

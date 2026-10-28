@@ -1,0 +1,18 @@
+1.2
+L1-VER 00_L1-VER_Pack-Verifier.md
+L1-WEB 01_L1-WEB_Web-Page-Evidence-Capture.md
+L1-DOM 02_L1-DOM_Domain-and-Website-Infrastructure.md
+L1-USR 03_L1-USR_Username-Handle-Enumeration.md
+L1-EML 04_L1-EML_Email-Address-Investigation.md
+L1-PHN 05_L1-PHN_Phone-Number-Investigation.md
+L1-SOC 06_L1-SOC_Social-Media-Profile-Preservation.md
+L1-IMG 07_L1-IMG_Image-and-Media-Verification.md
+L1-CRY 08_L1-CRY_Cryptocurrency-Address-Tracing.md
+L1-ORG 09_L1-ORG_Company-Business-Entity-Check.md
+L1-IPA 10_L1-IPA_IP-Address-Investigation.md
+L1-TGM 11_L1-TGM_Telegram-Channel-Preservation.md
+L1-ONI 12_L1-ONI_Onion-Service-Capture.md
+L1-DOC 13_L1-DOC_Document-and-File-Metadata.md
+L1-VID 14_L1-VID_YouTube-Video-Preservation.md
+L1-DSC 15_L1-DSC_Discord-Invite-and-Server-Preview.md
+L2-ORC L2-ORC_Investigation-Orchestrator.md

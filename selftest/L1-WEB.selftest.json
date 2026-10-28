@@ -1,0 +1,67 @@
+{
+  "schema": "l1-selftest/1.1",
+  "agent": "L1-WEB",
+  "agent_version": "1.2",
+  "verified_on": "2026-10-28",
+  "target": "https://example.com/",
+  "skip_steps": [],
+  "caps": {},
+  "sub_skips": {
+    "S6": "creation of a new public snapshot"
+  },
+  "intake_overrides": {},
+  "notes": "example.com is IANA's reserved domain. Its DNS/hosting change occasionally; only counts and patterns are asserted for those.",
+  "assertions": [
+    {
+      "id": "WEB-01",
+      "step": "S2",
+      "description": "final HTTP status",
+      "check": "equals",
+      "expect": 200
+    },
+    {
+      "id": "WEB-02",
+      "step": "S2",
+      "description": "redirect hops",
+      "check": "equals",
+      "expect": 0
+    },
+    {
+      "id": "WEB-03",
+      "step": "S3",
+      "description": "page title",
+      "check": "equals",
+      "expect": "Example Domain"
+    },
+    {
+      "id": "WEB-04",
+      "step": "S2",
+      "description": "DNS A answers for example.com",
+      "check": "gte",
+      "expect": 1,
+      "may_drift": true
+    },
+    {
+      "id": "WEB-05",
+      "step": "S4",
+      "description": "directly linked resources",
+      "check": "equals",
+      "expect": 0
+    },
+    {
+      "id": "WEB-06",
+      "step": "S6",
+      "description": "Wayback closest snapshot timestamp",
+      "check": "matches",
+      "expect": "^\\d{14}$",
+      "may_drift": true
+    },
+    {
+      "id": "WEB-07",
+      "step": "S7",
+      "description": "volatility result",
+      "check": "equals",
+      "expect": "STABLE"
+    }
+  ]
+}

@@ -1,0 +1,4 @@
+L1-OSINT-Evidence-Agents_*.zip
+__pycache__/
+*.pyc
+.DS_Store

@@ -1,0 +1,89 @@
+{
+  "schema": "l1-selftest/1.1",
+  "agent": "L1-ORG",
+  "agent_version": "1.2",
+  "verified_on": "2026-10-28",
+  "target": "Apple Inc.",
+  "skip_steps": [
+    "S5",
+    "S7",
+    "S8"
+  ],
+  "caps": {},
+  "sub_skips": {},
+  "intake_overrides": {
+    "16": "US",
+    "17": "LEI HWUPKR0MPOU8FGXBT394; CIK 0000320193"
+  },
+  "notes": "A large listed company with a stable LEI; name screening may produce potential matches on common words, which is acceptable.",
+  "assertions": [
+    {
+      "id": "ORG-01",
+      "step": "S4",
+      "description": "GLEIF HTTP status",
+      "check": "equals",
+      "expect": 200,
+      "source": "https://api.gleif.org/api/v1/lei-records/HWUPKR0MPOU8FGXBT394"
+    },
+    {
+      "id": "ORG-02",
+      "step": "S4",
+      "description": "LEI",
+      "check": "equals",
+      "expect": "HWUPKR0MPOU8FGXBT394"
+    },
+    {
+      "id": "ORG-03",
+      "step": "S4",
+      "description": "legal name",
+      "check": "equals",
+      "expect": "Apple Inc."
+    },
+    {
+      "id": "ORG-04",
+      "step": "S4",
+      "description": "jurisdiction",
+      "check": "equals",
+      "expect": "US-CA"
+    },
+    {
+      "id": "ORG-05",
+      "step": "S4",
+      "description": "registration status",
+      "check": "equals",
+      "expect": "ISSUED"
+    },
+    {
+      "id": "ORG-06",
+      "step": "S1",
+      "description": "official register identified",
+      "check": "contains",
+      "expect": "sec.gov"
+    },
+    {
+      "id": "ORG-07",
+      "step": "S2",
+      "description": "EDGAR company page HTTP status after redirect",
+      "check": "equals",
+      "expect": 200,
+      "note": "EDGAR requires a descriptive User-Agent with a contact email"
+    },
+    {
+      "id": "ORG-08",
+      "step": "S6",
+      "description": "OFAC + UN list files downloaded",
+      "check": "equals",
+      "expect": 200
+    },
+    {
+      "id": "ORG-09",
+      "step": "S6",
+      "description": "screening result",
+      "check": "in",
+      "expect": [
+        "NO MATCH",
+        "POTENTIAL MATCH (requires human review)"
+      ]
+    }
+  ]
+}

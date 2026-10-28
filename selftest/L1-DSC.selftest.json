@@ -1,0 +1,69 @@
+{
+  "schema": "l1-selftest/1.1",
+  "agent": "L1-DSC",
+  "agent_version": "1.2",
+  "verified_on": "2026-10-28",
+  "target": "https://discord.gg/discord-developers",
+  "skip_steps": [
+    "S6"
+  ],
+  "caps": {},
+  "sub_skips": {},
+  "intake_overrides": {},
+  "notes": "Discord's official developer server.",
+  "assertions": [
+    {
+      "id": "DSC-01",
+      "step": "S2",
+      "description": "invite JSON HTTP status",
+      "check": "equals",
+      "expect": 200
+    },
+    {
+      "id": "DSC-02",
+      "step": "S2",
+      "description": "guild.name",
+      "check": "equals",
+      "expect": "Discord Developers"
+    },
+    {
+      "id": "DSC-03",
+      "step": "S2",
+      "description": "guild.id",
+      "check": "equals",
+      "expect": "613425648685547541"
+    },
+    {
+      "id": "DSC-04",
+      "step": "S1",
+      "description": "Snowflake creation time of guild id",
+      "check": "equals",
+      "expect": "2019-08-20T17:34:31Z"
+    },
+    {
+      "id": "DSC-05",
+      "step": "S2",
+      "description": "approximate_member_count",
+      "check": "gte",
+      "expect": 100000,
+      "may_drift": true
+    },
+    {
+      "id": "DSC-06",
+      "step": "S3",
+      "description": "widget HTTP status",
+      "check": "in",
+      "expect": [
+        200,
+        403
+      ]
+    },
+    {
+      "id": "DSC-07",
+      "step": "S7",
+      "description": "drift line printed",
+      "check": "exists",
+      "expect": true
+    }
+  ]
+}

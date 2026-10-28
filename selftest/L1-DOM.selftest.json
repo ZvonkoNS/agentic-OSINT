@@ -1,0 +1,96 @@
+{
+  "schema": "l1-selftest/1.1",
+  "agent": "L1-DOM",
+  "agent_version": "1.2",
+  "verified_on": "2026-10-28",
+  "target": "example.com",
+  "skip_steps": [
+    "S9"
+  ],
+  "caps": {},
+  "sub_skips": {},
+  "intake_overrides": {
+    "16": "registrable domain"
+  },
+  "notes": "Nameserver names drift; count only.",
+  "assertions": [
+    {
+      "id": "DOM-01",
+      "step": "S2",
+      "description": "RDAP HTTP status",
+      "check": "equals",
+      "expect": 200
+    },
+    {
+      "id": "DOM-02",
+      "step": "S2",
+      "description": "RDAP ldhName",
+      "check": "equals",
+      "expect": "EXAMPLE.COM"
+    },
+    {
+      "id": "DOM-03",
+      "step": "S2",
+      "description": "RDAP registration event date",
+      "check": "equals",
+      "expect": "1995-08-14T04:00:00Z"
+    },
+    {
+      "id": "DOM-04",
+      "step": "S2",
+      "description": "RDAP nameserver count",
+      "check": "gte",
+      "expect": 2,
+      "may_drift": true,
+      "note": "names were elliott/hera.ns.cloudflare.com on the verification date"
+    },
+    {
+      "id": "DOM-05",
+      "step": "S3",
+      "description": "NS answers agree between two DoH resolvers",
+      "check": "equals",
+      "expect": true
+    },
+    {
+      "id": "DOM-06",
+      "step": "S6",
+      "description": "MX answer is empty or the null MX '0 .'",
+      "check": "in",
+      "expect": [
+        [],
+        [
+          "0 ."
+        ]
+      ]
+    },
+    {
+      "id": "DOM-07",
+      "step": "S4",
+      "description": "crt.sh certificate rows",
+      "check": "gte",
+      "expect": 10,
+      "may_drift": true
+    },
+    {
+      "id": "DOM-08",
+      "step": "S7",
+      "description": "home page HTTP status",
+      "check": "equals",
+      "expect": 200
+    },
+    {
+      "id": "DOM-09",
+      "step": "S7",
+      "description": "home page title",
+      "check": "equals",
+      "expect": "Example Domain"
+    },
+    {
+      "id": "DOM-10",
+      "step": "S8",
+      "description": "Wayback availability present",
+      "check": "exists",
+      "expect": true
+    }
+  ]
+}

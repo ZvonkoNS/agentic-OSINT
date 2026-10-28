@@ -1,0 +1,98 @@
+{
+  "schema": "l1-selftest/1.1",
+  "agent": "L1-USR",
+  "agent_version": "1.2",
+  "verified_on": "2026-10-28",
+  "target": "Gargron",
+  "skip_steps": [
+    "S5",
+    "S8"
+  ],
+  "caps": {},
+  "sub_skips": {},
+  "intake_overrides": {},
+  "notes": "Only the target handle is probed, as in a real run; control probes use a random handle per the S2 method.",
+  "assertions": [
+    {
+      "id": "USR-01",
+      "step": "S2",
+      "description": "mastodon.social control probe (random handle) returns not-found signature",
+      "check": "equals",
+      "expect": true,
+      "source": "https://mastodon.social/api/v1/accounts/lookup?acct=<random>"
+    },
+    {
+      "id": "USR-02",
+      "step": "S2",
+      "description": "keybase.io control probe (random handle) returns no user",
+      "check": "equals",
+      "expect": true
+    },
+    {
+      "id": "USR-03",
+      "step": "S2",
+      "description": "dev.to control probe (random handle) HTTP status",
+      "check": "equals",
+      "expect": 404
+    },
+    {
+      "id": "USR-04",
+      "step": "S4",
+      "description": "mastodon.social lookup HTTP status for Gargron",
+      "check": "equals",
+      "expect": 200,
+      "source": "https://mastodon.social/api/v1/accounts/lookup?acct=Gargron"
+    },
+    {
+      "id": "USR-05",
+      "step": "S4",
+      "description": "mastodon.social username",
+      "check": "equals",
+      "expect": "Gargron"
+    },
+    {
+      "id": "USR-06",
+      "step": "S4",
+      "description": "mastodon.social account id",
+      "check": "equals",
+      "expect": "1"
+    },
+    {
+      "id": "USR-07",
+      "step": "S4",
+      "description": "mastodon.social created_at starts with",
+      "check": "startswith",
+      "expect": "2016-03-16"
+    },
+    {
+      "id": "USR-08",
+      "step": "S3",
+      "description": "mastodon.social/@Gargron profile page HTTP status",
+      "check": "equals",
+      "expect": 200
+    },
+    {
+      "id": "USR-09",
+      "step": "S4",
+      "description": "Keybase lookup for Gargron returns a definite classification",
+      "check": "in",
+      "expect": [
+        "EXISTS",
+        "NOT FOUND"
+      ]
+    },
+    {
+      "id": "USR-10",
+      "step": "S3",
+      "description": "github.com/Gargron probe classification",
+      "check": "in",
+      "expect": [
+        "EXISTS",
+        "NOT FOUND",
+        "INCONCLUSIVE"
+      ],
+      "inconclusive_if_blocked": true,
+      "note": "GitHub blocks some sandboxes; INCONCLUSIVE is a valid result"
+    }
+  ]
+}

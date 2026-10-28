@@ -1,0 +1,77 @@
+{
+  "schema": "l1-selftest/1.1",
+  "agent": "L1-SOC",
+  "agent_version": "1.2",
+  "verified_on": "2026-10-28",
+  "target": "https://bsky.app/profile/bsky.app",
+  "skip_steps": [
+    "S5",
+    "S6"
+  ],
+  "caps": {},
+  "sub_skips": {},
+  "intake_overrides": {
+    "16": "10 most recent"
+  },
+  "notes": "Bluesky exposes a public, keyless API, so this test works without a browser; the mode will be ASSISTED on hosts without CAP-BROWSER and that is expected.",
+  "assertions": [
+    {
+      "id": "SOC-01",
+      "step": "S1",
+      "description": "public profile API HTTP status (platform public API source, 9.2)",
+      "check": "equals",
+      "expect": 200,
+      "source": "https://public.api.bsky.app/xrpc/app.bsky.actor.getProfile?actor=bsky.app"
+    },
+    {
+      "id": "SOC-02",
+      "step": "S3",
+      "description": "handle",
+      "check": "equals",
+      "expect": "bsky.app"
+    },
+    {
+      "id": "SOC-03",
+      "step": "S3",
+      "description": "stable ID (DID)",
+      "check": "equals",
+      "expect": "did:plc:z72i7hdynmk6r22z27h6tvur"
+    },
+    {
+      "id": "SOC-04",
+      "step": "S3",
+      "description": "createdAt starts with",
+      "check": "startswith",
+      "expect": "2023-04-12"
+    },
+    {
+      "id": "SOC-05",
+      "step": "S2",
+      "description": "profile page HTTP status",
+      "check": "equals",
+      "expect": 200
+    },
+    {
+      "id": "SOC-06",
+      "step": "S4",
+      "description": "author feed items (limit 10)",
+      "check": "gte",
+      "expect": 5,
+      "source": "https://public.api.bsky.app/xrpc/app.bsky.feed.getAuthorFeed?actor=bsky.app&limit=10"
+    },
+    {
+      "id": "SOC-07",
+      "step": "S4",
+      "description": "every feed item uri starts with",
+      "check": "startswith",
+      "expect": "at://did:plc:z72i7hdynmk6r22z27h6tvur/"
+    },
+    {
+      "id": "SOC-08",
+      "step": "S9",
+      "description": "drift line printed",
+      "check": "exists",
+      "expect": true
+    }
+  ]
+}

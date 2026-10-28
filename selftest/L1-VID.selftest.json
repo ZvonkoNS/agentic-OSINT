@@ -1,0 +1,89 @@
+{
+  "schema": "l1-selftest/1.1",
+  "agent": "L1-VID",
+  "agent_version": "1.2",
+  "verified_on": "2026-10-28",
+  "target": "https://www.youtube.com/watch?v=jNQXAC9IVRw",
+  "skip_steps": [
+    "S5",
+    "S8",
+    "S9"
+  ],
+  "caps": {},
+  "sub_skips": {},
+  "intake_overrides": {
+    "16": "N",
+    "17": "N"
+  },
+  "notes": "The first video uploaded to YouTube; public since 2005.",
+  "assertions": [
+    {
+      "id": "VID-01",
+      "step": "S1",
+      "description": "video id",
+      "check": "equals",
+      "expect": "jNQXAC9IVRw"
+    },
+    {
+      "id": "VID-02",
+      "step": "S3",
+      "description": "oEmbed HTTP status",
+      "check": "equals",
+      "expect": 200
+    },
+    {
+      "id": "VID-03",
+      "step": "S3",
+      "description": "oEmbed title",
+      "check": "equals",
+      "expect": "Me at the zoo"
+    },
+    {
+      "id": "VID-04",
+      "step": "S3",
+      "description": "oEmbed author_name",
+      "check": "equals",
+      "expect": "jawed"
+    },
+    {
+      "id": "VID-05",
+      "step": "S3",
+      "description": "oEmbed author_url",
+      "check": "equals",
+      "expect": "https://www.youtube.com/@jawed"
+    },
+    {
+      "id": "VID-06",
+      "step": "S2",
+      "description": "watch page HTTP status",
+      "check": "equals",
+      "expect": 200
+    },
+    {
+      "id": "VID-07",
+      "step": "S4",
+      "description": "yt-dlp upload_date (if yt-dlp ran)",
+      "check": "equals",
+      "expect": "20050423",
+      "inconclusive_if_blocked": true
+    },
+    {
+      "id": "VID-08",
+      "step": "S4",
+      "description": "yt-dlp duration seconds (if yt-dlp ran)",
+      "check": "between",
+      "expect": [
+        18,
+        20
+      ],
+      "inconclusive_if_blocked": true
+    },
+    {
+      "id": "VID-09",
+      "step": "S10",
+      "description": "drift line printed",
+      "check": "exists",
+      "expect": true
+    }
+  ]
+}

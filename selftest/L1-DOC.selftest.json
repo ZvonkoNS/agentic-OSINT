@@ -1,0 +1,87 @@
+{
+  "schema": "l1-selftest/1.1",
+  "agent": "L1-DOC",
+  "agent_version": "1.2",
+  "verified_on": "2026-10-28",
+  "target": "selftest/L1-DOC_selftest.pdf",
+  "skip_steps": [],
+  "caps": {},
+  "sub_skips": {},
+  "intake_overrides": {
+    "16": "07abda698a6064a8a199d3580e0809b07b1320b4cb533522ca4e0f9e536d4719",
+    "17": "n/a"
+  },
+  "notes": "One fixture per run, as in a real case. A DOCX fixture (L1-DOC_selftest.docx, author L1 SELFTEST, revision 3) is provided for a separate manual run; hashes in selftest/FIXTURE_HASHES.json.",
+  "assertions": [
+    {
+      "id": "DOC-01",
+      "step": "S1",
+      "description": "SHA-256",
+      "check": "equals",
+      "expect": "07abda698a6064a8a199d3580e0809b07b1320b4cb533522ca4e0f9e536d4719"
+    },
+    {
+      "id": "DOC-02",
+      "step": "S1",
+      "description": "size bytes",
+      "check": "equals",
+      "expect": 2012
+    },
+    {
+      "id": "DOC-03",
+      "step": "S1",
+      "description": "true type",
+      "check": "equals",
+      "expect": "application/pdf"
+    },
+    {
+      "id": "DOC-04",
+      "step": "S2",
+      "description": "page count",
+      "check": "equals",
+      "expect": 2
+    },
+    {
+      "id": "DOC-05",
+      "step": "S3",
+      "description": "/Author",
+      "check": "equals",
+      "expect": "L1 SELFTEST"
+    },
+    {
+      "id": "DOC-06",
+      "step": "S3",
+      "description": "/Title",
+      "check": "equals",
+      "expect": "L1 SELFTEST DOCUMENT"
+    },
+    {
+      "id": "DOC-07",
+      "step": "S7",
+      "description": "extracted text contains marker",
+      "check": "contains",
+      "expect": "ISO27037-SELFTEST-MARKER"
+    },
+    {
+      "id": "DOC-08",
+      "step": "S7",
+      "description": "Identifiers_Found contains URL",
+      "check": "contains",
+      "expect": "https://example.com/selftest-page"
+    },
+    {
+      "id": "DOC-09",
+      "step": "S7",
+      "description": "Identifiers_Found contains email",
+      "check": "contains",
+      "expect": "selftest@example.com"
+    },
+    {
+      "id": "DOC-10",
+      "step": "S5",
+      "description": "macros present",
+      "check": "equals",
+      "expect": false
+    }
+  ]
+}

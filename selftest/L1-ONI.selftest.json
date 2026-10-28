@@ -1,0 +1,61 @@
+{
+  "schema": "l1-selftest/1.1",
+  "agent": "L1-ONI",
+  "agent_version": "1.2",
+  "verified_on": "2026-10-28",
+  "target": "https://duckduckgogg42xjoc72x3sjasowoarfbgcmvfimaftt6twagswzczad.onion/",
+  "skip_steps": [
+    "S2",
+    "S3",
+    "S4",
+    "S6"
+  ],
+  "caps": {},
+  "sub_skips": {},
+  "intake_overrides": {
+    "16": "n/a",
+    "17": "n/a",
+    "18": "Y"
+  },
+  "notes": "The Investigator-side Tor Browser capture is optional in self-test; the agent-side validation and clearnet context are tested.",
+  "assertions": [
+    {
+      "id": "ONI-01",
+      "step": "S1",
+      "description": "address format valid (56 base32 + .onion)",
+      "check": "equals",
+      "expect": true
+    },
+    {
+      "id": "ONI-02",
+      "step": "S1",
+      "description": "version byte",
+      "check": "equals",
+      "expect": 3
+    },
+    {
+      "id": "ONI-03",
+      "step": "S1",
+      "description": "checksum valid (if computed)",
+      "check": "in",
+      "expect": [
+        true,
+        "not verified"
+      ]
+    },
+    {
+      "id": "ONI-04",
+      "step": "S5",
+      "description": "clearnet search result page captured",
+      "check": "gte",
+      "expect": 1
+    },
+    {
+      "id": "ONI-05",
+      "step": "unit",
+      "description": "validation routine applied to the v2 address expyuzz4wqqyqhjn.onion (code only)",
+      "check": "equals",
+      "expect": "NOT-INVESTIGABLE"
+    }
+  ]
+}

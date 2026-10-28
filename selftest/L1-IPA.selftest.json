@@ -1,0 +1,104 @@
+{
+  "schema": "l1-selftest/1.1",
+  "agent": "L1-IPA",
+  "agent_version": "1.2",
+  "verified_on": "2026-10-28",
+  "target": "1.1.1.1",
+  "skip_steps": [
+    "S8",
+    "S9"
+  ],
+  "caps": {},
+  "sub_skips": {},
+  "intake_overrides": {
+    "16": "2026-01-01T00:00:00Z"
+  },
+  "notes": "Cloudflare's public resolver; registration and routing are stable.",
+  "assertions": [
+    {
+      "id": "IPA-01",
+      "step": "S1",
+      "description": "classification",
+      "check": "equals",
+      "expect": "public"
+    },
+    {
+      "id": "IPA-02",
+      "step": "S2",
+      "description": "RDAP name",
+      "check": "equals",
+      "expect": "APNIC-LABS"
+    },
+    {
+      "id": "IPA-03",
+      "step": "S2",
+      "description": "RDAP range",
+      "check": "equals",
+      "expect": "1.1.1.0-1.1.1.255"
+    },
+    {
+      "id": "IPA-04",
+      "step": "S3",
+      "description": "ASN",
+      "check": "equals",
+      "expect": 13335
+    },
+    {
+      "id": "IPA-05",
+      "step": "S3",
+      "description": "prefix",
+      "check": "equals",
+      "expect": "1.1.1.0/24"
+    },
+    {
+      "id": "IPA-06",
+      "step": "S3",
+      "description": "routing history at incident timestamp shows ASN",
+      "check": "equals",
+      "expect": 13335
+    },
+    {
+      "id": "IPA-07",
+      "step": "S4",
+      "description": "PTR",
+      "check": "equals",
+      "expect": "one.one.one.one"
+    },
+    {
+      "id": "IPA-08",
+      "step": "S5",
+      "description": "two geolocation providers responded",
+      "check": "equals",
+      "expect": true
+    },
+    {
+      "id": "IPA-09",
+      "step": "S6",
+      "description": "in Tor bulk exit list",
+      "check": "equals",
+      "expect": false
+    },
+    {
+      "id": "IPA-10",
+      "step": "S6",
+      "description": "ExoneraTor page captured",
+      "check": "exists",
+      "expect": true
+    },
+    {
+      "id": "IPA-11",
+      "step": "S7",
+      "description": "Shodan InternetDB hostnames contain",
+      "check": "contains",
+      "expect": "one.one.one.one",
+      "may_drift": true
+    },
+    {
+      "id": "IPA-12",
+      "step": "unit",
+      "description": "validation routine applied to 192.168.1.1 (code only, no network)",
+      "check": "equals",
+      "expect": "NOT-INVESTIGABLE"
+    }
+  ]
+}

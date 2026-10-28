@@ -1,0 +1,83 @@
+{
+  "schema": "l1-selftest/1.1",
+  "agent": "L1-PHN",
+  "agent_version": "1.2",
+  "verified_on": "2026-10-28",
+  "target": "+442079460000",
+  "skip_steps": [
+    "S4",
+    "S5",
+    "S6"
+  ],
+  "caps": {},
+  "sub_skips": {},
+  "intake_overrides": {
+    "16": "GB"
+  },
+  "notes": "UK number range 020 7946 0xxx is reserved by Ofcom for drama use; it is assigned to nobody.",
+  "assertions": [
+    {
+      "id": "PHN-01",
+      "step": "S1",
+      "description": "valid",
+      "check": "equals",
+      "expect": true
+    },
+    {
+      "id": "PHN-02",
+      "step": "S1",
+      "description": "region",
+      "check": "equals",
+      "expect": "GB"
+    },
+    {
+      "id": "PHN-03",
+      "step": "S1",
+      "description": "number type",
+      "check": "equals",
+      "expect": "FIXED_LINE"
+    },
+    {
+      "id": "PHN-04",
+      "step": "S1",
+      "description": "E.164",
+      "check": "equals",
+      "expect": "+442079460000"
+    },
+    {
+      "id": "PHN-05",
+      "step": "S1",
+      "description": "geocoder description",
+      "check": "equals",
+      "expect": "London"
+    },
+    {
+      "id": "PHN-06",
+      "step": "S1",
+      "description": "time zone",
+      "check": "equals",
+      "expect": "Europe/London"
+    },
+    {
+      "id": "PHN-07",
+      "step": "S1",
+      "description": "phonenumbers library version recorded",
+      "check": "exists",
+      "expect": true
+    },
+    {
+      "id": "PHN-08",
+      "step": "S2",
+      "description": "regulator identified",
+      "check": "contains",
+      "expect": "ofcom.org.uk"
+    },
+    {
+      "id": "PHN-09",
+      "step": "S3",
+      "description": "search variants generated",
+      "check": "gte",
+      "expect": 5
+    }
+  ]
+}

@@ -1,0 +1,79 @@
+{
+  "schema": "l1-selftest/1.1",
+  "agent": "L1-EML",
+  "agent_version": "1.2",
+  "verified_on": "2026-10-28",
+  "target": "selftest@example.com",
+  "skip_steps": [
+    "S6",
+    "S7"
+  ],
+  "caps": {},
+  "sub_skips": {},
+  "intake_overrides": {},
+  "notes": "No third-party sweep for a test address.",
+  "assertions": [
+    {
+      "id": "EML-01",
+      "step": "S1",
+      "description": "local part",
+      "check": "equals",
+      "expect": "selftest"
+    },
+    {
+      "id": "EML-02",
+      "step": "S1",
+      "description": "domain",
+      "check": "equals",
+      "expect": "example.com"
+    },
+    {
+      "id": "EML-03",
+      "step": "S1",
+      "description": "role address",
+      "check": "equals",
+      "expect": false
+    },
+    {
+      "id": "EML-04",
+      "step": "S2",
+      "description": "MX answer is empty or null MX '0 .'",
+      "check": "in",
+      "expect": [
+        [],
+        [
+          "0 ."
+        ]
+      ]
+    },
+    {
+      "id": "EML-05",
+      "step": "S2",
+      "description": "RDAP registration date",
+      "check": "equals",
+      "expect": "1995-08-14T04:00:00Z"
+    },
+    {
+      "id": "EML-06",
+      "step": "S3",
+      "description": "disposable classification",
+      "check": "equals",
+      "expect": false
+    },
+    {
+      "id": "EML-07",
+      "step": "S4",
+      "description": "Gravatar avatar HTTP status for md5(selftest@example.com)",
+      "check": "equals",
+      "expect": 404
+    },
+    {
+      "id": "EML-08",
+      "step": "S5",
+      "description": "HIBP step status without key",
+      "check": "equals",
+      "expect": "DEFERRED",
+      "note": "with an agency key, use account-exists@hibp-integration-tests.com and expect >= 1 breach"
+    }
+  ]
+}

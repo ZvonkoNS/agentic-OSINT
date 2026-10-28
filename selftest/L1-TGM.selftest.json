@@ -1,0 +1,75 @@
+{
+  "schema": "l1-selftest/1.1",
+  "agent": "L1-TGM",
+  "agent_version": "1.2",
+  "verified_on": "2026-10-28",
+  "target": "t.me/telegram",
+  "skip_steps": [
+    "S7"
+  ],
+  "caps": {},
+  "sub_skips": {},
+  "intake_overrides": {
+    "16": "20 most recent"
+  },
+  "notes": "Telegram's official channel; counts drift.",
+  "assertions": [
+    {
+      "id": "TGM-01",
+      "step": "S2",
+      "description": "info page HTTP status",
+      "check": "equals",
+      "expect": 200
+    },
+    {
+      "id": "TGM-02",
+      "step": "S2",
+      "description": "title",
+      "check": "equals",
+      "expect": "Telegram News"
+    },
+    {
+      "id": "TGM-03",
+      "step": "S2",
+      "description": "handle present",
+      "check": "contains",
+      "expect": "@telegram"
+    },
+    {
+      "id": "TGM-04",
+      "step": "S2",
+      "description": "subscriber count displayed",
+      "check": "matches",
+      "expect": "^\\d[\\d\\s,.]*\\s*subscribers$",
+      "may_drift": true
+    },
+    {
+      "id": "TGM-05",
+      "step": "S3",
+      "description": "preview page HTTP status",
+      "check": "equals",
+      "expect": 200
+    },
+    {
+      "id": "TGM-06",
+      "step": "S3",
+      "description": "posts on preview page 1",
+      "check": "gte",
+      "expect": 10
+    },
+    {
+      "id": "TGM-07",
+      "step": "S3",
+      "description": "every captured post has ISO datetime",
+      "check": "equals",
+      "expect": true
+    },
+    {
+      "id": "TGM-08",
+      "step": "S4",
+      "description": "media files captured",
+      "check": "gte",
+      "expect": 1
+    }
+  ]
+}

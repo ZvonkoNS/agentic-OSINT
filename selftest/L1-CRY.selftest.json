@@ -1,0 +1,107 @@
+{
+  "schema": "l1-selftest/1.1",
+  "agent": "L1-CRY",
+  "agent_version": "1.2",
+  "verified_on": "2026-10-28",
+  "target": "1A1zP1eP5QGefi2DMPTfTL5SLmv7DivfNa",
+  "skip_steps": [
+    "S5",
+    "S7",
+    "S8"
+  ],
+  "caps": {
+    "S3": "most recent 100 plus earliest 100 (fetched by offset)"
+  },
+  "sub_skips": {},
+  "intake_overrides": {},
+  "notes": "Genesis coinbase address: its outputs are unspendable, so spent count is always 0; received counts only grow.",
+  "assertions": [
+    {
+      "id": "CRY-01",
+      "step": "S1",
+      "description": "chain",
+      "check": "equals",
+      "expect": "BTC"
+    },
+    {
+      "id": "CRY-02",
+      "step": "S1",
+      "description": "format",
+      "check": "equals",
+      "expect": "P2PKH"
+    },
+    {
+      "id": "CRY-03",
+      "step": "S1",
+      "description": "base58check valid",
+      "check": "equals",
+      "expect": true
+    },
+    {
+      "id": "CRY-04",
+      "step": "S2",
+      "description": "mempool.space HTTP status",
+      "check": "equals",
+      "expect": 200
+    },
+    {
+      "id": "CRY-05",
+      "step": "S2",
+      "description": "chain_stats.spent_txo_count",
+      "check": "equals",
+      "expect": 0
+    },
+    {
+      "id": "CRY-06",
+      "step": "S2",
+      "description": "chain_stats.funded_txo_count",
+      "check": "gte",
+      "expect": 80000,
+      "may_drift": true
+    },
+    {
+      "id": "CRY-07",
+      "step": "S2",
+      "description": "chain_stats.tx_count",
+      "check": "gte",
+      "expect": 60000,
+      "may_drift": true
+    },
+    {
+      "id": "CRY-08",
+      "step": "S2",
+      "description": "second explorer (blockchain.info rawaddr) n_tx",
+      "check": "gte",
+      "expect": 60000,
+      "may_drift": true
+    },
+    {
+      "id": "CRY-09",
+      "step": "S3",
+      "description": "earliest-100 export (fetched by offset): first transaction block height",
+      "check": "equals",
+      "expect": 0
+    },
+    {
+      "id": "CRY-10",
+      "step": "S3",
+      "description": "earliest-100 export: first transaction block time",
+      "check": "equals",
+      "expect": "2009-01-03T18:15:05Z"
+    },
+    {
+      "id": "CRY-11",
+      "step": "S6",
+      "description": "OFAC SDN CSV downloaded",
+      "check": "equals",
+      "expect": 200
+    },
+    {
+      "id": "CRY-12",
+      "step": "S6",
+      "description": "sanctions result",
+      "check": "equals",
+      "expect": "NO MATCH"
+    }
+  ]
+}
