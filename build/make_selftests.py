@@ -99,7 +99,7 @@ S["L1-SOC"] = spec("L1-SOC", "https://bsky.app/profile/bsky.app", [
     A("SOC-04","S3","createdAt starts with","startswith","2023-04-12"),
     A("SOC-05","S2","profile page HTTP status","equals",200),
     A("SOC-06","S4","author feed items (limit 10)","gte",5, source="https://public.api.bsky.app/xrpc/app.bsky.feed.getAuthorFeed?actor=bsky.app&limit=10"),
-    A("SOC-07","S4","feed item uris","all_startswith","at://did:plc:z72i7hdynmk6r22z27h6tvur/"),
+    A("SOC-07","S4","feed item uris","all_startswith","at://", note="Author feeds can include reposts whose original post URI belongs to a different DID; the URI prefix alone does not establish authorship."),
     A("SOC-08","S9","drift line printed","exists",True),
 ], ["S5","S6"], "Bluesky exposes a public, keyless API, so this test works without a browser; the mode will be ASSISTED on hosts without CAP-BROWSER and that is expected.", {"intake_overrides": {"16": "10 most recent"}})
 

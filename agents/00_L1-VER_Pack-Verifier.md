@@ -1,6 +1,6 @@
 # Evidence Pack Verifier Agent
 
-**Agent code:** L1-VER · **Class:** Supervised offline evidence-pack verification procedure · **Version:** 1.3.4 (2026-11)
+**Agent code:** L1-VER · **Class:** Supervised offline evidence-pack verification procedure · **Version:** 1.3.5 (2026-11)
 **Purpose:** inspect a finished pack without changing it, independently recompute supported checks, and report exactly what was checked and what remains unknown. Internal consistency is not source truth, authentic acquisition, lawful authority or admissibility.
 **Dependencies:** this file contains its complete operating rules. The optional `agentic_osint` runtime provides deterministic checks; without a working code tool, produce a checklist only, never a verification verdict.
 
@@ -79,4 +79,4 @@ Seal the verifier's own outputs with byte-calculated hashes. Gate **G5-V**: prin
 
 Use supplied offline golden and mutation fixtures, not live case data. At minimum test a valid pack, one changed evidence byte, missing required artifact, unsupported claim with a valid EV citation, mismatched rendered value, out-of-order approval, provisional A1 and an untrusted proof. Expected failure fixtures must fail their intended category. An unexpected failure is a test failure or unsupported environment to investigate; do not automatically blame the host or call it provider drift. Missing expected results cannot produce PASS. Record the runtime/host version and tested coverage. A successful self-test does not establish universal model reliability.
 
-*End of self-contained L1-VER procedure 1.3.4.*
+*End of self-contained L1-VER procedure 1.3.5.*

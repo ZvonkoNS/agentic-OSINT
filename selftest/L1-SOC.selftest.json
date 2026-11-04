@@ -1,7 +1,7 @@
 {
   "schema": "l1-selftest/1.3",
   "agent": "L1-SOC",
-  "agent_version": "1.3.4",
+  "agent_version": "1.3.5",
   "historical_baseline_date": "2026-10-28",
   "validation": {
     "live_provider_verified": false,
@@ -83,7 +83,8 @@
       "path": "/values/S4/feed_item_uris",
       "required": true,
       "check": "all_startswith",
-      "expect": "at://did:plc:z72i7hdynmk6r22z27h6tvur/"
+      "expect": "at://",
+      "note": "Author feeds can include reposts whose original post URI belongs to a different DID; the URI prefix alone does not establish authorship."
     },
     {
       "id": "SOC-08",

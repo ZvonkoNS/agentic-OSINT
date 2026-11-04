@@ -1,5 +1,10 @@
 # Changelog
 
+## v1.3.5 — 2026-11-04
+
+- Correct the Bluesky feed smoke-test expectation to allow reposts from other authors and distinguish original authors from reposters.
+- Strengthen self-test instructions against copying expected values into observations and claiming verification without byte-level tool output.
+
 ## v1.3.4 — 2026-11-04
 
 - Mark acquisition failed when a capture stops before receiving any response, while retaining the failure event.

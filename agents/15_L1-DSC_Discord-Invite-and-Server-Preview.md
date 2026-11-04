@@ -1,6 +1,6 @@
 # Discord Invite & Server Preview Agent
 
-**Agent code:** L1-DSC · **File:** `15_L1-DSC_Discord-Invite-and-Server-Preview.md` · **Class:** Level-1 OSINT procedure · **Version:** 1.3.4 (2026-11) · **Published at:** github.com/ZvonkoNS/agentic-OSINT
+**Agent code:** L1-DSC · **File:** `15_L1-DSC_Discord-Invite-and-Server-Preview.md` · **Class:** Level-1 OSINT procedure · **Version:** 1.3.5 (2026-11) · **Published at:** github.com/ZvonkoNS/agentic-OSINT
 
 **Purpose:** Document what Discord exposes publicly about one invite link or server ID — server name, numeric ID, approximate member counts, the invite's target channel, the inviter where shown, public widget data where enabled — without joining, without an account and without the Discord client.
 
@@ -475,6 +475,8 @@ Use minimum dummy data; show test scope/destinations/permissions and apply G1/G2
 
 Expected specs use `l1-selftest/1.3`; each assertion has JSON Pointer `path`, `required`, `check`, `expect`, and optional `may_drift`. Observed records use `agentic-osint/observations/1.3` with `values` and availability keyed by assertion ID (`OBSERVED`, `BLOCKED`, `NOT_RUN`, `ERROR`). Record actual output, not an expected value copied into an observation. Follow the shipped schema/runner for exact fields; do not create a private incompatible variant.
 
+An attached fixture or assertion contract is not proof that its bytes were inspected or hashed. For each hash, size, file-type, metadata or absence assertion, identify the actual byte-access or parser tool and retain its output; a model's reading of expected values, filename, rendered document or extracted text is not a byte-level measurement. If the required tool or raw bytes are unavailable, mark that assertion NOT_RUN and the aggregate INCOMPLETE. Never fill `values` or `availability` from the `expect` field, manufacture a comparator result, or call byte integrity VERIFIED without a calculated digest over the actual input bytes. Validate the exact observation schema, including `run_kind` and `availability`, with the installed runner; if it cannot run, say so and do not present an invented runner verdict.
+
 Aggregate deterministically: FAIL for failed required invariants; INCOMPLETE for missing required artifacts/observations; INCONCLUSIVE for required provider checks that cannot be assessed; DRIFT only for independently established change in a documented live expectation; PASS only when every required check passed. Missing/blocked mandatory work cannot PASS. A corrupted offline fixture is FAIL, not drift. Preserve failures when other optional checks succeed.
 
 Separate offline fixture/mutation/support/adversarial checks, live-provider availability and host/model evaluations. Keep historical verification dates as historical baselines. Report host/model/tools, repeated-run counts, denominators, omissions and limits. One successful SELFTEST does not measure unsupported-claim rates or platform false positives/negatives.
@@ -495,4 +497,4 @@ G1/G2: disclosed scope/policy. G3: specific browser actions. G4: specific change
 
 Artifact: saved bytes with acquisition/derivation record. Claim: supported source-value observation, negative result, traceable calculation or separately reviewed analysis. Integrity: byte equality to a recorded expectation, not truth. Coverage: declared required scope actually acquired. Lead: unverified item for separately authorized work. Timestamp: attestation of specific bytes under stated trust/validation conditions. Custody: actor/location transfer record with assurance actually demonstrated. Provisional: binding, bytes or checks remain incomplete.
 
-*End of agent file L1-DSC v1.3.4.*
+*End of agent file L1-DSC v1.3.5.*
