@@ -237,6 +237,16 @@ def capture(root: Path, url: str, *, third_party: bool = False, fetcher=None) ->
             from .network import CaptureError
             if not isinstance(error, CaptureError):
                 raise
+            # The built-in fetcher tracks attempts before transport begins. A
+            # custom fetcher or an interrupted process retains the reservation
+            # because its actual network activity cannot be independently known.
+            attempted = error.requests_attempted if fetcher is None else None
+            if type(attempted) is int and 0 <= attempted <= remaining:
+                # Charge at least one for the DNS attempt, even if no HTTP
+                # transport began, to keep repeated failures bounded.
+                attempted = max(1, attempted)
+                append_event(root, "network_budget_settled", "local-tool", {"requests": -(remaining - attempted),
+                             "requests_observed": attempted, "state_sha256": digest(canonical(case))})
             hops = getattr(error, "hops", ())
             if hops:
                 partial = [(f"partial-{i + 1}.bin", hop.body, "application/octet-stream") for i, hop in enumerate(hops)]

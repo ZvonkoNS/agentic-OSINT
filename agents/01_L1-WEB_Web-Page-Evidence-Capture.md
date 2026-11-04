@@ -1,6 +1,6 @@
 # Web Page Evidence Capture Agent
 
-**Agent code:** L1-WEB · **File:** `01_L1-WEB_Web-Page-Evidence-Capture.md` · **Class:** Level-1 OSINT procedure · **Version:** 1.3.2 (2026-11) · **Published at:** github.com/ZvonkoNS/agentic-OSINT
+**Agent code:** L1-WEB · **File:** `01_L1-WEB_Web-Page-Evidence-Capture.md` · **Class:** Level-1 OSINT procedure · **Version:** 1.3.3 (2026-11) · **Published at:** github.com/ZvonkoNS/agentic-OSINT
 
 **Purpose:** Preserve one publicly accessible web page (post, article, listing, profile page, document) with its redirect chain, selected linked media, metadata and explicitly bounded change checks for investigator review.
 
@@ -409,6 +409,7 @@ Validation of the identifier:
 - **Clean view.** Capture as an anonymous visitor. If the page content obviously depends on login, geography or A/B testing, state that the capture reflects the view from the capturing environment and record that environment (AI sandbox vs Investigator workstation, country if known).
 - **Allowed clicks** in a level-A capture: dismissing or *rejecting* a cookie banner; expanding "read more"/"show replies" controls that reveal already-public content; scrolling. Each click is logged. **Age or consent interstitials are never answered** (R2): the item becomes `DEFERRED` for the Investigator's own decision post-run. **Nothing else.**
 - **Relative dates.** Preserve "3 hours ago" as displayed. An absolute source timestamp from an attribute or tooltip is a separate source-stated value. If the platform's rounding convention and viewer time zone are documented, derive an interval with the formula, convention and capture-clock uncertainty; otherwise use `approximate age: 3 hours; absolute UTC not established`. Never turn rounded text into an exact publication instant.
+- **Change-label mapping.** If the installed `detect_changes` helper actually compared the relevant captured values, its `BODY_STABLE` maps to the agent's `BYTE_UNCHANGED`, its `CHANGED` body result maps to `BYTE_CHANGED`, and `TEXT_STABLE` maps to `TEXT_UNCHANGED`. Preserve the original helper output and method. The helper does not compare page metadata; never infer a metadata result from it. Do not map `NOT_CHECKED` to unchanged.
 - **Infinite scroll / long pages.** Scroll to the end if the page has a natural end; otherwise capture to a stated extent (e.g. 200 items or 5 minutes of scrolling) and record the extent as a limitation.
 - **Linked file selection and limits.** Default: up to 10 files, 50 MB total and 10 MB per file, with a 30-second request timeout. Enumerate all exposed resource URLs from the captured copy first; remove exact duplicates without changing the original strings. Select resources named in intake scope first (in the intake order), then the remaining approved URLs in lexicographic URL order. Record that rule, the seen/selected/captured counts and every omitted URL with a reason. Stop a streaming download before crossing a byte budget; preserve the partial bytes as PARTIAL, never a complete capture. A cap on content length is enforced even when the server omits or misstates Content-Length.
 - **Embedded third-party players** (video hosted elsewhere): capture the page as rendered; the media file itself is captured only if a direct, public media URL is exposed; otherwise record the embed URL as a Lead for L1-SOC/L1-IMG.
@@ -497,4 +498,4 @@ G1/G2: disclosed scope/policy. G3: specific browser actions. G4: specific change
 
 Artifact: saved bytes with acquisition/derivation record. Claim: supported source-value observation, negative result, traceable calculation or separately reviewed analysis. Integrity: byte equality to a recorded expectation, not truth. Coverage: declared required scope actually acquired. Lead: unverified item for separately authorized work. Timestamp: attestation of specific bytes under stated trust/validation conditions. Custody: actor/location transfer record with assurance actually demonstrated. Provisional: binding, bytes or checks remain incomplete.
 
-*End of agent file L1-WEB v1.3.2.*
+*End of agent file L1-WEB v1.3.3.*

@@ -1,6 +1,6 @@
 # Level-2 Investigation Orchestrator
 
-**Agent code:** L2-ORC · **Class:** Supervised offline planning procedure · **Version:** 1.3.2 (2026-11)
+**Agent code:** L2-ORC · **Class:** Supervised offline planning procedure · **Version:** 1.3.3 (2026-11)
 **Purpose:** compare supplied packs for one case, preserve their provenance and uncertainty, and propose up to three further checks. This procedure adds no captured evidence and never establishes that identifiers belong to the same person.
 **Dependencies:** this file contains its complete operating rules. The optional `agentic_osint` runtime supplies conservative identifier keys and an artifact-backed graph builder. Without code and actual files, return an unverified planning draft only.
 
@@ -98,4 +98,4 @@ Record tool versions, normalization rules, graph/claim checks, raw result counts
 
 Use harmless offline fixtures. Test same-minute packs with different UUIDs, duplicate EV IDs across packs, local-part email case, identical crypto bytes on two chains, missing original artifacts, a corrupt supplied artifact, an unsupported selector, an exact artifact-backed pair and a lead relation. Expected outcomes: no cross-pack EV collisions; distinct uncertain identifiers; no verified co-occurrence without checked source bytes; corrupt packs excluded; lead edges separate; at most three proposals. Missing expectations or unsupported checks yield incomplete, not PASS. Self-test success covers those fixtures and tool versions only.
 
-*End of self-contained L2-ORC procedure 1.3.2.*
+*End of self-contained L2-ORC procedure 1.3.3.*

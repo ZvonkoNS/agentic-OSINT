@@ -1,6 +1,6 @@
 # Username / Handle Enumeration Agent
 
-**Agent code:** L1-USR · **File:** `03_L1-USR_Username-Handle-Enumeration.md` · **Class:** Level-1 OSINT procedure · **Version:** 1.3.2 (2026-11) · **Published at:** github.com/ZvonkoNS/agentic-OSINT
+**Agent code:** L1-USR · **File:** `03_L1-USR_Username-Handle-Enumeration.md` · **Class:** Level-1 OSINT procedure · **Version:** 1.3.3 (2026-11) · **Published at:** github.com/ZvonkoNS/agentic-OSINT
 
 **Purpose:** Establish, with captured evidence, on which public platforms an exact username exists, and record the public attributes of those accounts without asserting that they belong to the same person.
 
@@ -493,4 +493,4 @@ G1/G2: disclosed scope/policy. G3: specific browser actions. G4: specific change
 
 Artifact: saved bytes with acquisition/derivation record. Claim: supported source-value observation, negative result, traceable calculation or separately reviewed analysis. Integrity: byte equality to a recorded expectation, not truth. Coverage: declared required scope actually acquired. Lead: unverified item for separately authorized work. Timestamp: attestation of specific bytes under stated trust/validation conditions. Custody: actor/location transfer record with assurance actually demonstrated. Provisional: binding, bytes or checks remain incomplete.
 
-*End of agent file L1-USR v1.3.2.*
+*End of agent file L1-USR v1.3.3.*

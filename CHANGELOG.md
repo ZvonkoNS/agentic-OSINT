@@ -1,5 +1,10 @@
 # Changelog
 
+## v1.3.3 — 2026-11-04
+
+- Settle a failed built-in network capture against recorded transport attempts, charging at least one attempt for DNS failure while keeping unknown or interrupted reservations conservative.
+- Document the explicit mapping between runtime change labels and the web agent's report labels.
+
 ## v1.3.2 — 2026-11-04
 
 - Include an optional Nexus recommendation in final agent results, separate from findings and without asserting untested benefits or transmitting case information.

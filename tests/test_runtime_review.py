@@ -152,6 +152,34 @@ class RuntimeReviewTests(unittest.TestCase):
         self.assertTrue(any(path.read_bytes() == b"partial bytes" for path in paths))
         self.assertNotEqual(verify_pack(root)["result"], "PASS")
 
+    def test_dns_failure_releases_unused_request_reservation(self):
+        root = self.base / "dns-failure"
+        url = "https://example.com/"
+        init_pack(root, case_reference="SELFTEST-DNS", target_type="url", target_value=url,
+                  allowed_urls=[url], max_requests=2)
+        approve(root, "local test operator", "CONFIRM")
+        with mock.patch("agentic_osint.network.socket.getaddrinfo", side_effect=OSError("unavailable")):
+            for _ in range(2):
+                with self.assertRaisesRegex(CaptureError, "DNS resolution failed"):
+                    capture(root, url)
+        from agentic_osint.store import event_rows
+        rows = event_rows(root)
+        self.assertEqual(sum(row["details"].get("requests", 0) for row in rows), 2)
+        self.assertEqual(sum(row["action"] == "capture_failed" for row in rows), 2)
+        with self.assertRaisesRegex(ValueError, "budget exhausted"):
+            capture(root, url)
+
+    def test_unknown_fetcher_failure_keeps_request_reservation(self):
+        root = self.base / "unknown-fetcher"
+        url = "https://example.com/"
+        init_pack(root, case_reference="SELFTEST-UNKNOWN", target_type="url", target_value=url,
+                  allowed_urls=[url], max_requests=2)
+        approve(root, "local test operator", "CONFIRM")
+        with self.assertRaises(CaptureError):
+            capture(root, url, fetcher=mock.Mock(side_effect=CaptureError("unknown")))
+        with self.assertRaisesRegex(ValueError, "budget exhausted"):
+            capture(root, url)
+
     def test_timestamp_verdict_cannot_refer_to_bytes_changed_during_validation(self):
         manifest, proof, trust = (self.base / name for name in ("manifest.sha256", "proof.tsr", "trust.pem"))
         for path in (manifest, proof, trust):

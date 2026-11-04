@@ -51,6 +51,8 @@ class CaptureError(ValueError):
         super().__init__(message)
         self.hops = tuple(hops)
         self.partial_body = partial_body
+        # Unknown unless the built-in fetcher recorded its own transport attempts.
+        self.requests_attempted: int | None = None
 
 
 class DestinationPolicyError(CaptureError):
@@ -490,6 +492,7 @@ def fetch_public(
     deadline = time.monotonic() + timeout
     hops: list[CaptureHop] = []
     total_bytes = 0
+    attempts = 0
     current = url
     redirects = 0
     try:
@@ -499,6 +502,7 @@ def fetch_public(
             target = _target(current, allowed, allow_http, resolver, deadline)
             started = _utc()
             try:
+                attempts += 1
                 response = transport(target)
             except (OSError, http.client.HTTPException) as exc:
                 raise CaptureError("HTTP connection or TLS verification failed") from exc
@@ -533,4 +537,5 @@ def fetch_public(
             redirects += 1
     except CaptureError as exc:
         exc.hops = tuple(hops)
+        exc.requests_attempted = attempts
         raise
