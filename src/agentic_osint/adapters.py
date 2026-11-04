@@ -175,7 +175,7 @@ def build_video_args(
     Provider/plugin functionality is not established by this offline helper.
     """
     host = _video_host(url)
-    if mode not in {"media", "metadata", "comments", "captions"}:
+    if mode not in {"media", "metadata", "comments", "captions", "captions_automatic"}:
         raise ValueError("Unknown video operation")
     _integer(max_bytes, "max_bytes", minimum=1, maximum=10_000_000_000)
     path = _output_directory(output_dir)
@@ -198,10 +198,10 @@ def build_video_args(
         args.extend(["--dump-single-json", "--write-info-json"])
     elif mode == "comments":
         args.extend(["--write-info-json", "--write-comments", "--extractor-args", "youtube:comment_sort=top;max_comments=100,100,0,0,1"])
+    elif mode in {"captions", "captions_automatic"}:
+        args.extend(["--write-info-json", "--write-subs" if mode == "captions" else "--write-auto-subs", "--sub-langs", ",".join(languages)])
     else:
-        args.extend(["--write-info-json", "--write-subs", "--write-auto-subs", "--sub-langs", ",".join(languages)])
-        if mode == "media":
-            args.extend(["--write-thumbnail", "--format", "bv*[height<=720]+ba/b[height<=720]"])
+        args.extend(["--write-info-json", "--write-thumbnail", "--format", "bv*[height<=720]+ba/b[height<=720]"])
     args.extend(["--", url])
     return args
 

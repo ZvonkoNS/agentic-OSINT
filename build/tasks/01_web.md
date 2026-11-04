@@ -25,7 +25,7 @@ Validation of the identifier:
 | Source | Use | Capture level | Notes |
 |---|---|---|---|
 | The URL itself (live) | Primary evidence | A (preferred) + B (parallel) | Logged-out, clean profile |
-| HTTP response headers at each hop | Redirect chain, server-stated dates, content-type | B | Save verbatim; `Date` is source metadata and a clock cross-check, not a trusted acquisition clock |
+| HTTP response headers at each hop | Redirect chain, server-stated dates, content-type | B | Record the saved representation; parsed header pairs are not verbatim header bytes. `Date` is source metadata and a clock cross-check, not a trusted acquisition clock |
 | Directly linked/embedded media and documents | Secondary items | B (A if the file only loads in a browser) | Same-origin or explicitly embedded only |
 | Wayback Machine availability API `https://archive.org/wayback/available?url=<url>` | Existence of prior snapshots | B | Third-party; context only |
 | archive.today (search by URL) | Existence of prior snapshots | A via G3; blocks automated fetch, so otherwise SKIPPED (optional) | Third-party; context only |
@@ -36,7 +36,7 @@ Validation of the identifier:
 | Step | Purpose | Level |
 |---|---|---|
 | S1 | URL anatomy (no network): scheme, host, punycode, path, query parameters as a table; shortener/redirector detection | — |
-| S2 | Resolution and redirect chain: DNS A/AAAA of host; follow redirects hop by hop, saving status line and headers of every hop; final URL recorded | B |
+| S2 | Resolution and redirect chain: DNS A/AAAA of host; follow redirects hop by hop, saving the available status, HTTP version and headers of every hop; record representation and final URL. Raw status lines/header bytes are not supplied by the local runtime | B |
 | S3 | Primary capture of the final page: level A via G3 (A1 or A2 as available: full-page screenshot, saved page/print-PDF where the browser allows); plus level B raw fetch with headers as an independent parallel item. Without CAP-BROWSER: level B only, and the page is listed for post-run A1 re-capture (§5.8) | A + B |
 | S4 | Linked resources: enumerate images, video, audio, documents (PDF/DOC/XLS…) referenced by the captured page; freeze the deterministic selection and omissions ledger in 9.4, then capture selected approved resources within the limits | B |
 | S5 | Page metadata from the captured copy: `<title>`, meta description/keywords, canonical, author, `article:published_time`/`modified_time`, OpenGraph, Twitter card, JSON-LD, `lang`, visible author handle(s), visible dates (absolute and relative), comment/like counts if visible; analytics/tracking IDs → Leads | — (derived from EV) |

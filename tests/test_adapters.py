@@ -49,7 +49,7 @@ class MethodAdapterTests(unittest.TestCase):
     def test_video_modes_are_single_target_and_nonmedia_skip_download(self):
         url = "https://www.youtube.com/watch?v=jNQXAC9IVRw&list=PLAYLIST"
         with tempfile.TemporaryDirectory() as directory:
-            for mode in ["media", "metadata", "comments", "captions"]:
+            for mode in ["media", "metadata", "comments", "captions", "captions_automatic"]:
                 args = build_video_args(url, mode=mode, output_dir=directory, max_bytes=1234)
                 self.assertIn("--ignore-config", args)
                 self.assertIn("--no-playlist", args)
@@ -61,7 +61,13 @@ class MethodAdapterTests(unittest.TestCase):
                 self.assertEqual("--skip-download" in args, mode != "media")
             captions = build_video_args(url, mode="captions", output_dir=directory)
             self.assertIn("--write-subs", captions)
-            self.assertIn("--write-auto-subs", captions)
+            self.assertNotIn("--write-auto-subs", captions)
+            automatic = build_video_args(url, mode="captions_automatic", output_dir=directory)
+            self.assertIn("--write-auto-subs", automatic)
+            self.assertNotIn("--write-subs", automatic)
+            media = build_video_args(url, mode="media", output_dir=directory)
+            self.assertNotIn("--write-subs", media)
+            self.assertNotIn("--write-auto-subs", media)
             comments = build_video_args(url, mode="comments", output_dir=directory)
             self.assertIn("youtube:comment_sort=top;max_comments=100,100,0,0,1", comments)
 

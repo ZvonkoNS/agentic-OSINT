@@ -1,6 +1,6 @@
 # Email Address Investigation Agent
 
-**Agent code:** L1-EML · **File:** `04_L1-EML_Email-Address-Investigation.md` · **Class:** Level-1 OSINT procedure · **Version:** 1.3.5 (2026-11) · **Published at:** github.com/ZvonkoNS/agentic-OSINT
+**Agent code:** L1-EML · **File:** `04_L1-EML_Email-Address-Investigation.md` · **Class:** Level-1 OSINT procedure · **Version:** 1.3.6 (2026-11) · **Published at:** github.com/ZvonkoNS/agentic-OSINT
 
 **Purpose:** Document what public sources show about one email address — its domain's mail setup, breach exposure listings, public avatar association and open-web mentions — without contacting the mailbox or probing account-recovery systems.
 
@@ -371,7 +371,7 @@ The module supplies inputs, sources and steps. Its A/B/T/D notation uses §5.2; 
 **Out of scope (→ Leads):** sending anything to the address; "forgot password" or registration probes on any platform (these can notify the mailbox owner and are prohibited by R2); full domain profile (L1-DOM); accounts found by handle (L1-USR).
 
 Validation:
-- The default adapter supports a bare ASCII dot-atom local part and an IDNA domain; reject leading/trailing/consecutive local-part dots and control characters. Preserve input bytes/text. Display-name forms require the bare address. Quoted local parts (which may themselves contain `@`), address literals and SMTPUTF8 local parts are `UNSUPPORTED_BY_ADAPTER`, not proof that the mailbox is invalid; use a tested standards-aware adapter before investigating those forms. Do not validate an email by counting `@` characters alone.
+- The default adapter supports a bare ASCII dot-atom or supported ASCII quoted local part and an IDNA domain; reject malformed dot-atoms and control characters. Preserve input bytes/text. Display-name forms require the bare address. Address literals and SMTPUTF8 local parts are `UNSUPPORTED_BY_ADAPTER`, not proof that the mailbox is invalid; use a tested standards-aware adapter before investigating unsupported forms. Do not validate an email by counting `@` characters alone.
 - Record exactly as given; lower-case the domain for lookups; keep the local part's case as given (and note that most providers treat it case-insensitively).
 - Plus-addressing (`user+tag@`) and dots in Gmail local parts: note the base form as a Lead, do not probe it.
 
@@ -450,7 +450,7 @@ The domain (L1-DOM); handles equal to the local part (L1-USR); base form of plus
 
 ### 9.10 Self-test specification
 
-The versioned `selftest/L1-EML.selftest.json` is the machine-readable assertion contract. Missing required observations, fixtures or adapters yield INCOMPLETE, never PASS. Required offline fixtures distinguish NULL_MX_NO_SERVICE (`0 .`), NO_MX with A/AAAA, NXDOMAIN, temporary failure and mixed invalid null-MX data; preserve `Alice@example.com` and `alice@example.com` as distinct by default; reject malformed dot-atoms and mark quoted/SMTPUTF8 input unsupported rather than nonexistent. Gravatar request fixtures use a 64-hex SHA-256 key for v3 and distinguish 404, 401, 429 and HTML bot walls. Optional live smoke target: `selftest@example.com`; S5 is DEFERRED without secure authorized credentials. `skip: S6, S7`.
+The versioned `selftest/L1-EML.selftest.json` is the machine-readable assertion contract. Missing required observations, fixtures or adapters yield INCOMPLETE, never PASS. Required offline fixtures distinguish NULL_MX_NO_SERVICE (`0 .`), NO_MX with A/AAAA, NXDOMAIN, temporary failure and mixed invalid null-MX data; preserve `Alice@example.com` and `alice@example.com` as distinct by default; reject malformed dot-atoms, test supported quoted ASCII local parts, and mark SMTPUTF8 input unsupported rather than nonexistent. Gravatar request fixtures use a 64-hex SHA-256 key for v3 and distinguish 404, 401, 429 and HTML bot walls. Optional live smoke target: `selftest@example.com`; S5 is DEFERRED without secure authorized credentials. `skip: S6, S7`.
 
 ### 9.11 Lawful-request mapping
 
@@ -496,4 +496,4 @@ G1/G2: disclosed scope/policy. G3: specific browser actions. G4: specific change
 
 Artifact: saved bytes with acquisition/derivation record. Claim: supported source-value observation, negative result, traceable calculation or separately reviewed analysis. Integrity: byte equality to a recorded expectation, not truth. Coverage: declared required scope actually acquired. Lead: unverified item for separately authorized work. Timestamp: attestation of specific bytes under stated trust/validation conditions. Custody: actor/location transfer record with assurance actually demonstrated. Provisional: binding, bytes or checks remain incomplete.
 
-*End of agent file L1-EML v1.3.5.*
+*End of agent file L1-EML v1.3.6.*

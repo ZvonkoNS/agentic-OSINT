@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "agentic-osint"
-version = "1.3.5"
+version = "1.3.6"
 description = "Supervised OSINT procedures and a local, deterministic evidence-pack toolkit"
 readme = "README.md"
 requires-python = ">=3.11"

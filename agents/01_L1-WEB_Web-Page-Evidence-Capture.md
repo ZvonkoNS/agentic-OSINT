@@ -1,6 +1,6 @@
 # Web Page Evidence Capture Agent
 
-**Agent code:** L1-WEB · **File:** `01_L1-WEB_Web-Page-Evidence-Capture.md` · **Class:** Level-1 OSINT procedure · **Version:** 1.3.5 (2026-11) · **Published at:** github.com/ZvonkoNS/agentic-OSINT
+**Agent code:** L1-WEB · **File:** `01_L1-WEB_Web-Page-Evidence-Capture.md` · **Class:** Level-1 OSINT procedure · **Version:** 1.3.6 (2026-11) · **Published at:** github.com/ZvonkoNS/agentic-OSINT
 
 **Purpose:** Preserve one publicly accessible web page (post, article, listing, profile page, document) with its redirect chain, selected linked media, metadata and explicitly bounded change checks for investigator review.
 
@@ -385,7 +385,7 @@ Validation of the identifier:
 | Source | Use | Capture level | Notes |
 |---|---|---|---|
 | The URL itself (live) | Primary evidence | A (preferred) + B (parallel) | Logged-out, clean profile |
-| HTTP response headers at each hop | Redirect chain, server-stated dates, content-type | B | Save verbatim; `Date` is source metadata and a clock cross-check, not a trusted acquisition clock |
+| HTTP response headers at each hop | Redirect chain, server-stated dates, content-type | B | Record the saved representation; parsed header pairs are not verbatim header bytes. `Date` is source metadata and a clock cross-check, not a trusted acquisition clock |
 | Directly linked/embedded media and documents | Secondary items | B (A if the file only loads in a browser) | Same-origin or explicitly embedded only |
 | Wayback Machine availability API `https://archive.org/wayback/available?url=<url>` | Existence of prior snapshots | B | Third-party; context only |
 | archive.today (search by URL) | Existence of prior snapshots | A via G3; blocks automated fetch, so otherwise SKIPPED (optional) | Third-party; context only |
@@ -396,7 +396,7 @@ Validation of the identifier:
 | Step | Purpose | Level |
 |---|---|---|
 | S1 | URL anatomy (no network): scheme, host, punycode, path, query parameters as a table; shortener/redirector detection | — |
-| S2 | Resolution and redirect chain: DNS A/AAAA of host; follow redirects hop by hop, saving status line and headers of every hop; final URL recorded | B |
+| S2 | Resolution and redirect chain: DNS A/AAAA of host; follow redirects hop by hop, saving the available status, HTTP version and headers of every hop; record representation and final URL. Raw status lines/header bytes are not supplied by the local runtime | B |
 | S3 | Primary capture of the final page: level A via G3 (A1 or A2 as available: full-page screenshot, saved page/print-PDF where the browser allows); plus level B raw fetch with headers as an independent parallel item. Without CAP-BROWSER: level B only, and the page is listed for post-run A1 re-capture (§5.8) | A + B |
 | S4 | Linked resources: enumerate images, video, audio, documents (PDF/DOC/XLS…) referenced by the captured page; freeze the deterministic selection and omissions ledger in 9.4, then capture selected approved resources within the limits | B |
 | S5 | Page metadata from the captured copy: `<title>`, meta description/keywords, canonical, author, `article:published_time`/`modified_time`, OpenGraph, Twitter card, JSON-LD, `lang`, visible author handle(s), visible dates (absolute and relative), comment/like counts if visible; analytics/tracking IDs → Leads | — (derived from EV) |
@@ -500,4 +500,4 @@ G1/G2: disclosed scope/policy. G3: specific browser actions. G4: specific change
 
 Artifact: saved bytes with acquisition/derivation record. Claim: supported source-value observation, negative result, traceable calculation or separately reviewed analysis. Integrity: byte equality to a recorded expectation, not truth. Coverage: declared required scope actually acquired. Lead: unverified item for separately authorized work. Timestamp: attestation of specific bytes under stated trust/validation conditions. Custody: actor/location transfer record with assurance actually demonstrated. Provisional: binding, bytes or checks remain incomplete.
 
-*End of agent file L1-WEB v1.3.5.*
+*End of agent file L1-WEB v1.3.6.*

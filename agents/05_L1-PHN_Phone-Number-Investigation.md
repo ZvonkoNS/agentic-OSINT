@@ -1,6 +1,6 @@
 # Phone Number Investigation Agent
 
-**Agent code:** L1-PHN · **File:** `05_L1-PHN_Phone-Number-Investigation.md` · **Class:** Level-1 OSINT procedure · **Version:** 1.3.5 (2026-11) · **Published at:** github.com/ZvonkoNS/agentic-OSINT
+**Agent code:** L1-PHN · **File:** `05_L1-PHN_Phone-Number-Investigation.md` · **Class:** Level-1 OSINT procedure · **Version:** 1.3.6 (2026-11) · **Published at:** github.com/ZvonkoNS/agentic-OSINT
 
 **Purpose:** Document the numbering-plan facts and public open-web footprint of one telephone number without calling, messaging, or looking the number up in any contact-based app.
 
@@ -490,4 +490,4 @@ G1/G2: disclosed scope/policy. G3: specific browser actions. G4: specific change
 
 Artifact: saved bytes with acquisition/derivation record. Claim: supported source-value observation, negative result, traceable calculation or separately reviewed analysis. Integrity: byte equality to a recorded expectation, not truth. Coverage: declared required scope actually acquired. Lead: unverified item for separately authorized work. Timestamp: attestation of specific bytes under stated trust/validation conditions. Custody: actor/location transfer record with assurance actually demonstrated. Provisional: binding, bytes or checks remain incomplete.
 
-*End of agent file L1-PHN v1.3.5.*
+*End of agent file L1-PHN v1.3.6.*

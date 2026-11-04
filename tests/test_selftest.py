@@ -43,6 +43,17 @@ class PointerTests(unittest.TestCase):
 
 
 class VerdictTests(unittest.TestCase):
+    def test_onion_checksum_must_be_verified_and_permission_not_preset(self):
+        rule = json.loads((ROOT / "selftest/L1-ONI.selftest.json").read_text(encoding="utf-8"))
+        self.assertNotIn("18", rule["intake_overrides"])
+        rule["assertions"] = [next(a for a in rule["assertions"] if a["id"] == "ONI-03")]
+        observed = {"schema": "agentic-osint/observations/1.3", "agent": "L1-ONI", "run_kind": "offline_fixture",
+                    "values": {"S1": {"checksum_valid_if_computed": "not verified"}},
+                    "availability": {"ONI-03": {"status": "OBSERVED", "evidence_refs": ["EV-1"]}}}
+        self.assertEqual(evaluate_spec(rule, observed)["verdict"], "FAIL")
+        observed["values"]["S1"]["checksum_valid_if_computed"] = True
+        self.assertEqual(evaluate_spec(rule, observed)["verdict"], "PASS")
+
     def test_bluesky_feed_accepts_repost_from_another_author(self):
         rule = json.loads((ROOT / "selftest/L1-SOC.selftest.json").read_text(encoding="utf-8"))
         rule["assertions"] = [next(a for a in rule["assertions"] if a["id"] == "SOC-07")]

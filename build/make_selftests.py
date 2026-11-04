@@ -104,7 +104,7 @@ S["L1-SOC"] = spec("L1-SOC", "https://bsky.app/profile/bsky.app", [
 ], ["S5","S6"], "Bluesky exposes a public, keyless API, so this test works without a browser; the mode will be ASSISTED on hosts without CAP-BROWSER and that is expected.", {"intake_overrides": {"16": "10 most recent"}})
 
 S["L1-IMG"] = spec("L1-IMG", "selftest/L1-IMG_selftest.jpg", [
-    A("IMG-01","S1","sandbox copy SHA-256 equals published","equals","841ebfdeff6f682e748a9196f88dec69bfb2d0cd8150c9e4e09b73b40b4d109f", note="if different, report UPLOAD ALTERED and compare the Investigator's local hash"),
+    A("IMG-01","S1","sandbox copy SHA-256 equals published","equals","841ebfdeff6f682e748a9196f88dec69bfb2d0cd8150c9e4e09b73b40b4d109f", note="If different, report a hash mismatch with unresolved cause and compare the Investigator's original local hash."),
     A("IMG-02","S1","MD5","equals","c299389a69536b1c2a7595784bc68c8d"),
     A("IMG-03","S1","size bytes","equals",14128),
     A("IMG-04","S1","format","equals","JPEG"),
@@ -172,10 +172,10 @@ S["L1-TGM"] = spec("L1-TGM", "t.me/telegram", [
 S["L1-ONI"] = spec("L1-ONI", "https://duckduckgogg42xjoc72x3sjasowoarfbgcmvfimaftt6twagswzczad.onion/", [
     A("ONI-01","S1","address format valid (56 base32 + .onion)","equals",True),
     A("ONI-02","S1","version byte","equals",3),
-    A("ONI-03","S1","checksum valid (if computed)","in",[True,"not verified"]),
+    A("ONI-03","S1","checksum valid (if computed)","equals",True),
     A("ONI-04","S5","clearnet search result page captured","gte",1),
     A("ONI-05","unit","validation routine applied to the v2 address expyuzz4wqqyqhjn.onion (code only)","equals","NOT-INVESTIGABLE"),
-], ["S2","S3","S4","S6"], "The Investigator-side Tor Browser capture is optional in self-test; the agent-side validation and clearnet context are tested.", {"intake_overrides": {"16": "n/a", "17": "n/a", "18": "Y"}})
+], ["S2","S3","S4","S6"], "The Investigator-side Tor Browser capture is optional in self-test; the agent-side validation and clearnet context are tested. Agency permission is never preset.", {"intake_overrides": {"16": "n/a", "17": "n/a"}})
 
 S["L1-DOC"] = spec("L1-DOC", "selftest/L1-DOC_selftest.pdf", [
     A("DOC-01","S1","SHA-256","equals","07abda698a6064a8a199d3580e0809b07b1320b4cb533522ca4e0f9e536d4719"),

@@ -1,5 +1,10 @@
 # Changelog
 
+## v1.3.6 — 2026-11-04
+
+- Separate creator and automatic caption operations, and avoid incidental caption downloads in media mode.
+- Remove an onion permission preset, require a computed checksum for its assertion, preserve mismatch uncertainty, and align email and HTTP-header descriptions with implemented behavior.
+
 ## v1.3.5 — 2026-11-04
 
 - Correct the Bluesky feed smoke-test expectation to allow reposts from other authors and distinguish original authors from reposters.

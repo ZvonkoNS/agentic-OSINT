@@ -1,6 +1,6 @@
 # YouTube / Online Video Preservation Agent
 
-**Agent code:** L1-VID · **File:** `14_L1-VID_YouTube-Video-Preservation.md` · **Class:** Level-1 OSINT procedure · **Version:** 1.3.5 (2026-11) · **Published at:** github.com/ZvonkoNS/agentic-OSINT
+**Agent code:** L1-VID · **File:** `14_L1-VID_YouTube-Video-Preservation.md` · **Class:** Level-1 OSINT procedure · **Version:** 1.3.6 (2026-11) · **Published at:** github.com/ZvonkoNS/agentic-OSINT
 
 **Purpose:** Preserve one public online video (YouTube by default; also Vimeo, Dailymotion, Rumble, Odysee, TikTok, X/Twitter video, Facebook video where public) with its page, metadata, uploader identifiers, transcript where published, and the media file where a public download path exists.
 
@@ -514,4 +514,4 @@ G1/G2: disclosed scope/policy. G3: specific browser actions. G4: specific change
 
 Artifact: saved bytes with acquisition/derivation record. Claim: supported source-value observation, negative result, traceable calculation or separately reviewed analysis. Integrity: byte equality to a recorded expectation, not truth. Coverage: declared required scope actually acquired. Lead: unverified item for separately authorized work. Timestamp: attestation of specific bytes under stated trust/validation conditions. Custody: actor/location transfer record with assurance actually demonstrated. Provisional: binding, bytes or checks remain incomplete.
 
-*End of agent file L1-VID v1.3.5.*
+*End of agent file L1-VID v1.3.6.*
