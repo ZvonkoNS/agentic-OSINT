@@ -1,0 +1,8 @@
+{
+  "fixture_kind": "negative_claim_support",
+  "evidence_text": "Public profile displays nickname: riverbird.",
+  "unsupported_statement": "The account is owned by Alice Example.",
+  "misleading_evidence_reference": "EV-1",
+  "expected_support_status": "FAIL",
+  "reason": "Resolving an evidence ID does not make an ownership claim supported."
+}

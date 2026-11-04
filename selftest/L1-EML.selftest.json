@@ -1,8 +1,13 @@
 {
-  "schema": "l1-selftest/1.1",
+  "schema": "l1-selftest/1.3",
   "agent": "L1-EML",
-  "agent_version": "1.2",
-  "verified_on": "2026-10-28",
+  "agent_version": "1.3.0",
+  "historical_baseline_date": "2026-10-28",
+  "validation": {
+    "live_provider_verified": false,
+    "host_matrix": [],
+    "scope": "Compares supplied observations; does not generate them or certify a host."
+  },
   "target": "selftest@example.com",
   "skip_steps": [
     "S6",
@@ -17,6 +22,8 @@
       "id": "EML-01",
       "step": "S1",
       "description": "local part",
+      "path": "/values/S1/local_part",
+      "required": true,
       "check": "equals",
       "expect": "selftest"
     },
@@ -24,6 +31,8 @@
       "id": "EML-02",
       "step": "S1",
       "description": "domain",
+      "path": "/values/S1/domain",
+      "required": true,
       "check": "equals",
       "expect": "example.com"
     },
@@ -31,25 +40,30 @@
       "id": "EML-03",
       "step": "S1",
       "description": "role address",
+      "path": "/values/S1/role_address",
+      "required": true,
       "check": "equals",
       "expect": false
     },
     {
       "id": "EML-04",
       "step": "S2",
-      "description": "MX answer is empty or null MX '0 .'",
+      "description": "mail routing classification",
+      "path": "/values/S2/mail_routing_classification",
+      "required": true,
       "check": "in",
       "expect": [
-        [],
-        [
-          "0 ."
-        ]
+        "explicit_null_mx",
+        "no_mx_with_address_fallback",
+        "mx_present"
       ]
     },
     {
       "id": "EML-05",
       "step": "S2",
       "description": "RDAP registration date",
+      "path": "/values/S2/rdap_registration_date",
+      "required": true,
       "check": "equals",
       "expect": "1995-08-14T04:00:00Z"
     },
@@ -57,20 +71,26 @@
       "id": "EML-06",
       "step": "S3",
       "description": "disposable classification",
+      "path": "/values/S3/disposable_classification",
+      "required": true,
       "check": "equals",
       "expect": false
     },
     {
       "id": "EML-07",
       "step": "S4",
-      "description": "Gravatar avatar HTTP status for md5(selftest@example.com)",
+      "description": "Gravatar SHA256 identifier",
+      "path": "/values/S4/gravatar_sha256_identifier",
+      "required": true,
       "check": "equals",
-      "expect": 404
+      "expect": "372d59d467e41413a6bf12a595d0cdcf81dbaa71eb58f1579bb25309bc68f97b"
     },
     {
       "id": "EML-08",
       "step": "S5",
       "description": "HIBP step status without key",
+      "path": "/values/S5/hibp_step_status_without_key",
+      "required": true,
       "check": "equals",
       "expect": "DEFERRED",
       "note": "with an agency key, use account-exists@hibp-integration-tests.com and expect >= 1 breach"

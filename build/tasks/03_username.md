@@ -12,18 +12,18 @@ INPUT_TYPE: username / handle (exact string, without a leading @)
 
 Validation:
 - Strip a leading `@` if present and tell the Investigator you did.
-- Allowed: letters, digits, `.`, `_`, `-`; length 1–64. Spaces are not a username — ask again.
-- Case: record as given; probe lower-case form where a platform is case-insensitive and say so per platform.
+- Preserve the complete Unicode handle and its script; reject control characters, whitespace and URL/credential forms. Each selected platform adapter validates its own supported character set, length and normalization before any request. `INVALID_FOR_PLATFORM` is not `NOT_FOUND`; unsupported internationalized handles are `UNSUPPORTED_BY_ADAPTER`, not invalid identities.
+- Case and comparison keys are platform-specific; keep the raw handle and platform/instance namespace. A transformation is used only when the versioned adapter documents that service's equivalence rule. Never assume that the same handle string on two services names the same account.
 
-**Intake additions (printed with the form):** none. Authorisation **D: none**.
+**Intake additions (printed with the form):** field **16** = "Approved platform/instance list (default: select from 9.4; the exact destination list is shown before requests)". Authorisation **D** = "Optional additional enumeration: approve the explicitly listed additional platforms and target-bearing destinations? Y/N (default N)". A general web-app approval is not approval to send the handle to hundreds of unspecified sites.
 
 ### 9.2 Sources
 
 | Source | Use | Level | Notes |
 |---|---|---|---|
-| Direct profile URL probes (fixed list, 9.4) | Existence per platform | B | Interpret status code **and** page markers (soft-404 control, 9.5) |
+| Direct profile URL probes (approved subset of 9.4) | Public existence per platform | B | Only a tested platform-specific classifier may return EXISTS/NOT_FOUND; generic HTTP/size differences remain INCONCLUSIVE |
 | Public JSON endpoints: GitHub `https://api.github.com/users/<h>`, Keybase `https://keybase.io/_/api/1.0/user/lookup.json?usernames=<h>`, Mastodon `https://mastodon.social/api/v1/accounts/lookup?acct=<h>` (and the same path on any other instance named in the case) | Structured attributes | B | Keyless; rate-limited |
-| WhatsMyName web app (`https://whatsmyname.app`) | Broad existence sweep | A via G3 only | Open-source dataset. **The web app itself contacts several hundred sites from the capturing browser**; that must be stated in the G3 URL list. Without G3 consent the step is SKIPPED. Each hit is a candidate to verify by direct capture |
+| WhatsMyName dataset or optional UI (`https://whatsmyname.app`) | Candidate platform discovery | C | Freeze a versioned dataset and restrict execution to the intake-approved subset. If the UI cannot demonstrably restrict target-bearing requests to that exact list, do not run its bulk sweep. Additional destinations require D and scope approval before the request; every hit remains a candidate until directly verified |
 | Search engines: `"<handle>"` | Mentions outside platforms | C → A | Capture only cited result pages |
 | Each existing profile page (logged-out) | Attribute capture | A (B fallback) | Full-page screenshot + saved page |
 
@@ -31,20 +31,20 @@ Validation:
 
 | Step | Purpose | Level |
 |---|---|---|
-| S1 | Normalise; print the platform probe list (9.4) and the control-probe method (S2 below); platforms marked R are not probed from the sandbox (9.4) | — |
-| S2 | Control probes (P-marked platforms only): request a random 20-character handle to learn each platform's "not found" signature (status/size/marker) | B |
-| S3 | Target probes (P-marked platforms): request the profile URL for the target handle; classify `EXISTS` / `NOT FOUND` / `INCONCLUSIVE (blocked, bot wall)`; save every response (headers + body). R-marked platforms: level A via G3 if available, else recorded INCONCLUSIVE and listed in the post-run list | B / A |
+| S1 | Preserve input; freeze platform/instance scope, adapter versions and per-platform validated handle; print destinations, request budget and control method. Do not run unsupported platform adapters or R-marked sandbox probes | — |
+| S2 | Control probes (approved P-marked platforms with tested adapters): generate two different syntactically valid nonexistent-candidate handles under that platform's grammar, save exact values/requests, and verify the adapter's explicit not-found signature. A control that exists is replaced once within budget; conflicting/blocked controls make target classification INCONCLUSIVE | B |
+| S3 | Target probes: record EXISTS only with platform-specific positive evidence (stable account ID and exact canonical handle/profile field, or another documented positive signature tested against login, reserved-route and soft-404 fixtures); NOT_FOUND only with the tested explicit negative signature. Preserve INVALID_FOR_PLATFORM, RENAMED, SUSPENDED, AUTH_REQUIRED, BLOCKED, UNSUPPORTED_BY_ADAPTER and INCONCLUSIVE separately. Save headers and bytes for all results. R-marked platforms use approved level A if available | B / A |
 | S4 | Structured endpoints: GitHub, Keybase, Mastodon lookup JSON | B |
-| S5 | Broad sweep: WhatsMyName results captured via G3 (SKIPPED without it); each new hit re-verified by the S3 method before it counts | A |
+| S5 | Optional expanded sweep: only the frozen additional subset approved under D, using bounded adapters; otherwise SKIPPED. UI results are candidates and do not expand destinations or scope. Re-verify each approved candidate by S3 before it counts | A / B |
 | S6 | Profile captures: for every `EXISTS` result, full capture of the public profile page (up to 20 profiles; remainder to the post-run list) | A (B fallback) |
 | S7 | Attribute table from captured copies: display name, bio, stated location, links, join/creation date, follower/following/post counts, verification badge, avatar file (captured) with SHA-256 and perceptual hash (if `imagehash` available) | — (derived) |
 | S8 | Search-engine mentions: results page captured; up to 10 relevant result URLs captured as level B/A | C → A |
 | S9 | Linkage indicators: same avatar hash, same bio text, cross-links between profiles, same display name — recorded as observations with EV refs, never as a conclusion | — |
 | S10 | Findings, inventory, custody, outputs (Phase 3) | — |
 
-### 9.4 Fixed platform list (print it; add nothing without G4)
+### 9.4 Candidate platform list (select and approve before requests)
 
-Probe URL patterns (`<h>` = handle). Mark per platform whether the logged-out view is normally public (P), restricted (R), or public for some profiles only (P/R — probed from the sandbox like P; if its control probe is inconclusive, treat it as R):
+These are candidate URL patterns, not a tested compatibility matrix (`<h>` is escaped as a path component by the adapter). P/R labels are historical hints only: the actual response and installed adapter determine support. Select the required subset at intake, record exact hosts including instances, and do not add a destination merely because a search result or dataset mentions it. Without a supported classifier, preserve a page as a candidate and report INCONCLUSIVE:
 
 `github.com/<h>` (P) · `gitlab.com/<h>` (P) · `x.com/<h>` (R – often requires login) · `instagram.com/<h>` (R) · `facebook.com/<h>` (R) · `tiktok.com/@<h>` (P/R) · `youtube.com/@<h>` (P) · `reddit.com/user/<h>` (P) · `t.me/<h>` (P – public channel/user preview) · `linkedin.com/in/<h>` (R) · `pinterest.com/<h>` (P) · `twitch.tv/<h>` (P) · `steamcommunity.com/id/<h>` (P) · `soundcloud.com/<h>` (P) · `medium.com/@<h>` (P) · `keybase.io/<h>` (P) · `about.me/<h>` (P) · `vk.com/<h>` (P/R) · `mastodon.social/@<h>` (P; other instances are Leads) · `bsky.app/profile/<h>.bsky.social` (P) · `threads.net/@<h>` (P/R) · `flickr.com/people/<h>` (P) · `vimeo.com/<h>` (P) · `patreon.com/<h>` (P) · `discord` — no public profile URL; record "not probeable" · `snapchat.com/add/<h>` (P/R) · `telegram` covered by t.me · `tumblr.com` → `<h>.tumblr.com` (P) · `dev.to/<h>` (P) · `hackerone.com/<h>` (P).
 
@@ -54,7 +54,7 @@ Platforms marked R return a login shell or a bot wall to sandbox requests, so sa
 
 | Symptom | Remedy to propose at G4 |
 |---|---|
-| Platform returns 200 for the random control handle (soft-404) | Classify by page marker/size difference between control and target, not by status; if still ambiguous → INCONCLUSIVE and level-A check |
+| Platform returns 200 for a negative control (soft-404) | Use only the tested platform-specific explicit negative and positive signatures. Size differences alone never establish existence; login shells, reserved paths or ambiguous content → INCONCLUSIVE |
 | Bot wall / 403 on probe | Mark INCONCLUSIVE; level-A check via G3 if available for that platform only; else post-run list |
 | Login wall | Record `not accessible without authentication`; Lead: lawful platform request |
 | Rate limit (GitHub 60/h keyless, Reddit, others) | Pause; reorder; do not add keys or accounts |
@@ -64,7 +64,7 @@ Platforms marked R return a login shell or a bot wall to sandbox requests, so sa
 
 ### 9.6 Findings structure
 
-1. **Probe results** — table: platform, result, basis (status + marker), EV ref. State the total: n EXISTS / n NOT FOUND / n INCONCLUSIVE.
+1. **Probe results** — table: platform/instance, adapter/version, result, precise positive/negative basis, stable ID if captured and EV ref. Keep unsupported/invalid/renamed/suspended/blocked results separate; totals include approved, attempted, conclusive and omitted platforms rather than implying a complete Internet search.
 2. **Captured profiles** — one short neutral paragraph per existing profile (what the public page shows), EV refs.
 3. **Attribute comparison** — the S7 table side by side.
 4. **Linkage observations** — S9, phrased as "the avatars of profiles X and Y are visually near-identical (perceptual-hash distance 2, EV-012/EV-019; platforms re-encode avatars, so byte-identical files are not expected)" — never "belong to the same person". This sub-section is labelled **Analysis (outside ISO/IEC 27037 — opinion)**.
@@ -73,7 +73,7 @@ Platforms marked R return a login shell or a bot wall to sandbox requests, so sa
 
 ### 9.7 XLSX sheets
 
-`Platform_Probes` (platform, URL, control result, target result, classification, UTC, EV) · `Profiles_Captured` (platform, URL, EV screenshot, EV page, SHA-256s) · `Profile_Attributes` (platform, display name, bio, location, links, created, followers, following, posts, verified, avatar SHA-256, avatar phash, EV) · `Linkage_Indicators` (indicator, profiles involved, basis, EV refs) · `Mentions` (URL, title, snippet, captured EV).
+`Platform_Probes` (platform, instance, adapter/version, raw handle, comparison key, URL, control values/results, target result, positive/negative field or signature, stable ID, UTC, EV) · `Scope_Coverage` (platform, approved Y/N, attempted Y/N, omitted reason) · `Profiles_Captured` (platform, URL, EV screenshot, EV page, SHA-256s) · `Profile_Attributes` (platform, display name, bio, location, links, created, followers, following, posts, verified, avatar SHA-256, avatar phash, EV) · `Linkage_Indicators` (indicator, profiles involved, basis, EV refs) · `Mentions` (URL, title, snippet, captured EV).
 
 ### 9.8 Interpretation cautions
 
@@ -89,7 +89,7 @@ Handle variants; renamed-account targets; other Mastodon/Fediverse instances; pr
 
 ### 9.10 Self-test specification
 
-Target handle: `Gargron` (the founder account on mastodon.social; stable, public). Only the target handle is probed, exactly as in a real run. Assertions: S2 control probes produce a not-found signature on `mastodon.social` (API returns `Record not found`), on `keybase.io` (lookup returns no user) and on `dev.to` (HTTP 404); S3/S4 target: Mastodon lookup HTTP 200 with `username` = `Gargron`, `id` = `1`, `created_at` starting `2016-03-16`, and the profile page `mastodon.social/@Gargron` HTTP 200; Keybase lookup for `Gargron` returns a definite result (a user or none — either is a valid classification); `github.com/Gargron` probe returns a classification (EXISTS/NOT FOUND/INCONCLUSIVE — GitHub may block sandboxes, which gives INCONCLUSIVE, not FAIL). `skip: S5` (WhatsMyName), `skip: S8`.
+The versioned `selftest/L1-USR.selftest.json` is the machine-readable assertion contract. Missing required observations, fixtures or adapters yield INCOMPLETE, never PASS. Required offline adapter fixtures include existing, nonexistent, invalid-syntax, login-shell, soft-404, renamed, suspended, localized and blocked responses. A 200 login shell or differently sized generic page must not become EXISTS; a control outside the platform grammar must not be used. Optional live smoke target: `Gargron` on explicitly approved services only, recording current values and coverage rather than assuming IDs, dates or provider availability remain fixed. `skip: S5, S8`.
 
 ### 9.11 Lawful-request mapping
 

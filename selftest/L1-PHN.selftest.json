@@ -1,8 +1,13 @@
 {
-  "schema": "l1-selftest/1.1",
+  "schema": "l1-selftest/1.3",
   "agent": "L1-PHN",
-  "agent_version": "1.2",
-  "verified_on": "2026-10-28",
+  "agent_version": "1.3.0",
+  "historical_baseline_date": "2026-10-28",
+  "validation": {
+    "live_provider_verified": false,
+    "host_matrix": [],
+    "scope": "Compares supplied observations; does not generate them or certify a host."
+  },
   "target": "+442079460000",
   "skip_steps": [
     "S4",
@@ -20,6 +25,8 @@
       "id": "PHN-01",
       "step": "S1",
       "description": "valid",
+      "path": "/values/S1/valid",
+      "required": true,
       "check": "equals",
       "expect": true
     },
@@ -27,6 +34,8 @@
       "id": "PHN-02",
       "step": "S1",
       "description": "region",
+      "path": "/values/S1/region",
+      "required": true,
       "check": "equals",
       "expect": "GB"
     },
@@ -34,6 +43,8 @@
       "id": "PHN-03",
       "step": "S1",
       "description": "number type",
+      "path": "/values/S1/number_type",
+      "required": true,
       "check": "equals",
       "expect": "FIXED_LINE"
     },
@@ -41,6 +52,8 @@
       "id": "PHN-04",
       "step": "S1",
       "description": "E.164",
+      "path": "/values/S1/e_164",
+      "required": true,
       "check": "equals",
       "expect": "+442079460000"
     },
@@ -48,6 +61,8 @@
       "id": "PHN-05",
       "step": "S1",
       "description": "geocoder description",
+      "path": "/values/S1/geocoder_description",
+      "required": true,
       "check": "equals",
       "expect": "London"
     },
@@ -55,6 +70,8 @@
       "id": "PHN-06",
       "step": "S1",
       "description": "time zone",
+      "path": "/values/S1/time_zone",
+      "required": true,
       "check": "equals",
       "expect": "Europe/London"
     },
@@ -62,6 +79,8 @@
       "id": "PHN-07",
       "step": "S1",
       "description": "phonenumbers library version recorded",
+      "path": "/values/S1/phonenumbers_library_version_recorded",
+      "required": true,
       "check": "exists",
       "expect": true
     },
@@ -69,6 +88,8 @@
       "id": "PHN-08",
       "step": "S2",
       "description": "regulator identified",
+      "path": "/values/S2/regulator_identified",
+      "required": true,
       "check": "contains",
       "expect": "ofcom.org.uk"
     },
@@ -76,6 +97,8 @@
       "id": "PHN-09",
       "step": "S3",
       "description": "search variants generated",
+      "path": "/values/S3/search_variants_generated",
+      "required": true,
       "check": "gte",
       "expect": 5
     }

@@ -11,9 +11,10 @@ INPUT_TYPE: telephone number (E.164 preferred, e.g. +38640123456; otherwise the 
 **Out of scope (→ Leads or prohibited):** calling or messaging the number; adding it to a contact list to see WhatsApp/Telegram/Signal/Viber presence or profile photos (prohibited — R2: it can alert the subject and uses an account); carrier-lookup services that require accounts or payment; social-media searches that require login.
 
 Validation:
-- Accept E.164 (`+` followed by 8–15 digits) or a national number with an explicit country (ISO code or name). Strip spaces, dashes, dots, parentheses for parsing; keep the original string.
-- If the country is missing and the number has no `+`, ask for the country; do not guess.
-- Reject obvious non-numbers (letters other than a leading `+`, fewer than 6 digits).
+- Preserve the raw string and use a pinned `phonenumbers` adapter for parsing and formatting; do not impose an invented global minimum digit count. National numbers require an explicit ISO region; a leading `+` uses the supplied calling code without guessing a country from the investigator's location.
+- Record separate parse status, `is_possible_number_with_reason`, `is_valid_number`, type and region as library-derived metadata, with library version. `valid per metadata` does not establish current allocation, reachability, operator or subscriber. A shared calling code may not identify one country.
+- Reject control characters and ambiguous multiple numbers. Extensions are retained separately and are never included in an E.164 search key. Short codes/emergency/service codes and alphanumeric vanity input are `UNSUPPORTED_BY_ADAPTER` unless a dedicated adapter and scope cover them; never invent a normalized subscriber number.
+- An unparseable or impossible number stops target-bearing requests and becomes NOT_INVESTIGABLE. A possible-but-not-valid number is an explicitly limited validation result: ask for confirmation/correction at intake before any open-web query, preserve the metadata caveat and never change the country silently. Without the library, return VALIDATION_NOT_PERFORMED and defer number-specific network work.
 
 **Intake additions (printed with the form):** field **16** = "Country of the number (ISO code or name) if you did not give it in E.164 form". Authorisation **D: none**.
 
@@ -32,7 +33,7 @@ Validation:
 
 | Step | Purpose | Level |
 |---|---|---|
-| S1 | Parse and normalise: E.164, national and international formats; validity; number type; region; original carrier; time zone(s) — saved as JSON tool output | D |
+| S1 | Parse using the pinned library; retain raw string/extension and explicit region; output parse/possible/valid states separately, E.164/national/international forms only when established, metadata-derived type/region/range-carrier/time-zone candidates and version. Apply the intake decision for uncertain validation before network work | D |
 | S2 | Numbering-plan corroboration: identify the official regulator for the country; capture the page or document that shows the range allocation; if the regulator publishes a range database, capture the matching row | A/B |
 | S3 | Generate search variants: E.164, international with spaces, national with/without leading zero, grouped forms common in the country, digits only; print the list | — |
 | S4 | Open-web sweep: one exact-match query per variant; capture each results page; capture up to 10 relevant result pages | C → A/B |
@@ -43,7 +44,7 @@ Validation:
 ### 9.4 Task-specific capture rules
 
 - **No contact of any kind** (call, SMS, WhatsApp, Telegram, Signal, Viber, iMessage, FaceTime). No "add contact". No lookups in apps bound to a phone identity. If the Investigator asks, refuse under R2 and record it; note that such checks, if lawful in the jurisdiction, must be done by the Investigator under agency procedure with a dedicated device — not by this agent.
-- Record the `phonenumbers` metadata version with the parse output; the carrier mapping is a static dataset and is dated by that version.
+- Record the `phonenumbers` metadata version with the parse output; carrier and time-zone mappings are static range metadata dated by that version, not current operator or a person's current location. Record empty/ambiguous values as returned.
 - Number portability is **not** public in most countries: the carrier in S1/S2 is the original range holder. State this wherever a carrier is mentioned.
 - Crowd-sourced reputation sites contain unverified public submissions; capture them, transcribe counts, and label them hearsay in Findings.
 - Search variant queries are recorded verbatim with the engine used.
@@ -52,15 +53,15 @@ Validation:
 
 | Symptom | Remedy to propose at G4 |
 |---|---|
-| `phonenumbers` not installed | `pip install phonenumbers`; if blocked, parse by E.164 rules only and record "type/carrier not determined" |
+| `phonenumbers` not installed | Use the approved pinned dependency installation if permitted; otherwise VALIDATION_NOT_PERFORMED and defer number-specific network work. A digit-count guess is not a replacement validation method |
 | Regulator site unknown / not in English | Search `<country> telecommunications regulator numbering plan`; verify governmental domain; if still unclear, record FAILED-DOCUMENTED |
 | Reputation site shows CAPTCHA | G3 if available; else DEFERRED; never automate past it |
 | Search engines return nothing for any variant | Record "no exact-match results at <UTC>" — a fact about the index, not about the number |
-| Number is reported as not valid for the region | Record the invalidity with the library basis and continue with the open-web steps; the country was fixed at intake (field 16) — do not alter the number or re-ask mid-run; note in Leads that a re-run with a corrected country may be warranted |
+| Number is possible but not valid per metadata | Preserve both results and the library reason; only continue under the limited result explicitly accepted at intake. Unparseable/impossible numbers stop target-bearing requests. A new country or corrected number requires a separate intake decision, never silent normalization |
 
 ### 9.6 Findings structure
 
-1. **Number facts** — formats, validity, type, region, original carrier, time zone (EV: tool output + regulator capture).
+1. **Number structure and metadata** — raw input/extension, parse/possible/valid states and reasons, established formats, library-derived type/region/original-range carrier/time-zone candidates (EV: tool output + regulator capture), with explicit allocation/reachability unknowns.
 2. **Open-web mentions** — table with context, which variant matched, EV refs.
 3. **Crowd-sourced reports** — per site: report count, categories, latest report date as shown; labelled "public submissions, unverified".
 4. **Business/registry associations** — captured listings.
@@ -68,7 +69,7 @@ Validation:
 
 ### 9.7 XLSX sheets
 
-`Number_Parse` (field, value, basis) · `Search_Variants` (variant, engine, query, results page EV) · `Web_Mentions` (URL, title, variant matched, context, EV, SHA-256) · `Reputation_Reports` (site, count, categories, latest date shown, EV) · `Listings` (source, name shown, address shown, EV).
+`Number_Parse` (raw input, region input, extension, parse status, possible reason, valid per metadata, established format, metadata version, value, basis) · `Search_Variants` (variant, selection basis, engine, query, results page EV) · `Web_Mentions` (URL, title, variant matched, context, EV, SHA-256) · `Reputation_Reports` (site, count, categories, latest date shown, EV) · `Listings` (source, name shown, address shown, EV).
 
 ### 9.8 Interpretation cautions
 
@@ -83,7 +84,7 @@ Names, businesses, addresses and emails seen in mentions (separate runs); the or
 
 ### 9.10 Self-test specification
 
-Target: `+442079460000` (a UK number in the Ofcom range reserved for drama use — it is assigned to nobody). Assertions: `phonenumbers` parse: valid = `True`, region `GB`, type `FIXED_LINE`, E.164 `+442079460000`, geocoder description `London`, time zone `Europe/London`; library version recorded; S2 regulator identified as Ofcom (gov/regulator domain `ofcom.org.uk`); S3 produces ≥ 5 search variants; `skip: S4, S5, S6` (no open-web sweep for a reserved number).
+The versioned `selftest/L1-PHN.selftest.json` is the machine-readable assertion contract. Missing required observations, fixtures or adapters yield INCOMPLETE, never PASS. Required offline parsing fixtures cover national numbers with/without region, short valid numbering-plan examples, shared calling codes, extensions, possible-but-invalid and impossible inputs, unsupported short codes and missing-library behavior. Assert no target-bearing request for unparseable/impossible/unsupported input. Optional smoke target: `+442079460000`, the published Ofcom drama-range example, with metadata values attributed to the installed library version. No test calls or messages it. `skip: S4, S5, S6`.
 
 ### 9.11 Lawful-request mapping
 

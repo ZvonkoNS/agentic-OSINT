@@ -1,8 +1,13 @@
 {
-  "schema": "l1-selftest/1.1",
+  "schema": "l1-selftest/1.3",
   "agent": "L1-USR",
-  "agent_version": "1.2",
-  "verified_on": "2026-10-28",
+  "agent_version": "1.3.0",
+  "historical_baseline_date": "2026-10-28",
+  "validation": {
+    "live_provider_verified": false,
+    "host_matrix": [],
+    "scope": "Compares supplied observations; does not generate them or certify a host."
+  },
   "target": "Gargron",
   "skip_steps": [
     "S5",
@@ -17,6 +22,8 @@
       "id": "USR-01",
       "step": "S2",
       "description": "mastodon.social control probe (random handle) returns not-found signature",
+      "path": "/values/S2/mastodon_social_control_probe_random_handle_returns_not_found_signature",
+      "required": true,
       "check": "equals",
       "expect": true,
       "source": "https://mastodon.social/api/v1/accounts/lookup?acct=<random>"
@@ -25,6 +32,8 @@
       "id": "USR-02",
       "step": "S2",
       "description": "keybase.io control probe (random handle) returns no user",
+      "path": "/values/S2/keybase_io_control_probe_random_handle_returns_no_user",
+      "required": true,
       "check": "equals",
       "expect": true
     },
@@ -32,6 +41,8 @@
       "id": "USR-03",
       "step": "S2",
       "description": "dev.to control probe (random handle) HTTP status",
+      "path": "/values/S2/dev_to_control_probe_random_handle_http_status",
+      "required": true,
       "check": "equals",
       "expect": 404
     },
@@ -39,6 +50,8 @@
       "id": "USR-04",
       "step": "S4",
       "description": "mastodon.social lookup HTTP status for Gargron",
+      "path": "/values/S4/mastodon_social_lookup_http_status_for_gargron",
+      "required": true,
       "check": "equals",
       "expect": 200,
       "source": "https://mastodon.social/api/v1/accounts/lookup?acct=Gargron"
@@ -47,6 +60,8 @@
       "id": "USR-05",
       "step": "S4",
       "description": "mastodon.social username",
+      "path": "/values/S4/mastodon_social_username",
+      "required": true,
       "check": "equals",
       "expect": "Gargron"
     },
@@ -54,6 +69,8 @@
       "id": "USR-06",
       "step": "S4",
       "description": "mastodon.social account id",
+      "path": "/values/S4/mastodon_social_account_id",
+      "required": true,
       "check": "equals",
       "expect": "1"
     },
@@ -61,6 +78,8 @@
       "id": "USR-07",
       "step": "S4",
       "description": "mastodon.social created_at starts with",
+      "path": "/values/S4/mastodon_social_created_at_starts_with",
+      "required": true,
       "check": "startswith",
       "expect": "2016-03-16"
     },
@@ -68,6 +87,8 @@
       "id": "USR-08",
       "step": "S3",
       "description": "mastodon.social/@Gargron profile page HTTP status",
+      "path": "/values/S3/mastodon_social_gargron_profile_page_http_status",
+      "required": true,
       "check": "equals",
       "expect": 200
     },
@@ -75,6 +96,8 @@
       "id": "USR-09",
       "step": "S4",
       "description": "Keybase lookup for Gargron returns a definite classification",
+      "path": "/values/S4/keybase_lookup_for_gargron_returns_a_definite_classification",
+      "required": true,
       "check": "in",
       "expect": [
         "EXISTS",
@@ -85,6 +108,8 @@
       "id": "USR-10",
       "step": "S3",
       "description": "github.com/Gargron probe classification",
+      "path": "/values/S3/github_com_gargron_probe_classification",
+      "required": true,
       "check": "in",
       "expect": [
         "EXISTS",

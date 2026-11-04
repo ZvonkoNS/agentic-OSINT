@@ -1,0 +1,118 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:agentic-osint:schema:selftest-result:1.3",
+  "title": "agentic-OSINT selftest-result 1.3",
+  "type": "object",
+  "properties": {
+    "schema": {
+      "const": "agentic-osint/selftest-result/1.3"
+    },
+    "agent": {
+      "type": "string",
+      "minLength": 1
+    },
+    "run_kind": {
+      "enum": [
+        "offline_fixture",
+        "live_smoke"
+      ]
+    },
+    "verdict": {
+      "enum": [
+        "PASS",
+        "FAIL",
+        "INCOMPLETE",
+        "INCONCLUSIVE",
+        "DRIFT"
+      ]
+    },
+    "release_eligible": {
+      "type": "boolean"
+    },
+    "scope": {
+      "type": "string",
+      "minLength": 1
+    },
+    "required_checked": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "required_total": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "checks": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "minLength": 1
+          },
+          "step": {
+            "type": "string",
+            "minLength": 1
+          },
+          "path": {
+            "type": "string",
+            "minLength": 1
+          },
+          "required": {
+            "type": "boolean"
+          },
+          "status": {
+            "enum": [
+              "PASS",
+              "FAIL",
+              "INCOMPLETE",
+              "INCONCLUSIVE",
+              "DRIFT"
+            ]
+          },
+          "observed": {},
+          "observed_present": {
+            "type": "boolean"
+          },
+          "expected": {},
+          "reason": {
+            "type": "string"
+          },
+          "evidence_refs": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "minItems": 0
+          }
+        },
+        "required": [
+          "id",
+          "step",
+          "path",
+          "required",
+          "status",
+          "observed",
+          "observed_present",
+          "expected",
+          "reason",
+          "evidence_refs"
+        ],
+        "additionalProperties": false
+      },
+      "minItems": 1
+    }
+  },
+  "required": [
+    "schema",
+    "agent",
+    "run_kind",
+    "verdict",
+    "release_eligible",
+    "scope",
+    "required_checked",
+    "required_total",
+    "checks"
+  ],
+  "additionalProperties": false
+}

@@ -22,7 +22,7 @@ Validation and ingest:
 | Tool | Use | Level |
 |---|---|---|
 | `hashlib`, `python-magic` / signature table | Hashes, true type | D |
-| `pypdf` / `pikepdf` | PDF info dictionary, XMP, page count, incremental updates (count of `%%EOF`), annotations, attachments, form fields, signature fields, embedded files, images | D |
+| A pinned PDF parser supporting cross-reference/trailer traversal (`pypdf` / `pikepdf` only for features the installed version exposes) | PDF info/XMP, pages, validated `startxref`/xref/trailer `/Prev` revision chain, annotations, attachments and signature fields. Raw `%%EOF` occurrence counts are not revision counts | D |
 | `python-docx`, `openpyxl`, `python-pptx`, `zipfile` | OOXML core/app properties, revision, last-modified-by, template, total editing time, comments/tracked changes presence (`word/comments.xml`, `w:ins`/`w:del`), embedded media list, `vbaProject.bin` presence | D |
 | `olefile` + `oletools` (`olemeta`, `olevba --decode` listing only) | Legacy OLE metadata, macro presence/listing (never executed) | D |
 | `odfpy` / `zipfile` | OpenDocument `meta.xml` | D |
@@ -37,11 +37,11 @@ Validation and ingest:
 | Step | Purpose | Level |
 |---|---|---|
 | S1 | Ingest: EV-001/EV-002, size, SHA-256, MD5, SHA-1 (for cross-referencing with other systems), true type vs extension, hash-match statement | A1 + D |
-| S2 | Container structure: part list (OOXML/ODF/archives), PDF object summary (pages, incremental update count, encryption flag, linearisation), compressed-size anomalies | D |
+| S2 | Container structure: bounded part listing; PDF page/encryption/linearization fields and parsed revision-chain offsets. A single validated revision means zero incremental updates. If the parser repairs the file, omits xref-stream support or cannot validate the chain, record `revision history INCONCLUSIVE`, retaining its diagnostics | D |
 | S3 | Metadata: core/app/XMP/info-dictionary fields verbatim into a table; Investigator's ExifTool JSON (A1) alongside; note which fields are absent | A1 / D |
 | S4 | Revision traces: last-modified-by, revision number, total editing time, template name, creation/modification tools and versions, tracked changes present, comments present (count), PDF incremental updates with the byte offsets, prior-version text if trivially recoverable from incremental updates (recorded as separate derived items) | D |
 | S5 | Embedded content: images and other embedded files extracted as derived EV items with hashes; EXIF of embedded images; macro/script presence with a listing of module names (no execution); external-link relationships (`oleObject`, `hyperlink` targets, remote templates) listed | D |
-| S6 | Digital signatures: presence; signer name as stated in the signature; validity as reported by the library (`not verified` if no library can check) | D |
+| S6 | Digital signatures: presence and claimed signer fields; use a dedicated supported validator for ByteRange/coverage, mathematical integrity, post-signature changes, certificate-chain trust, revocation status and validation time as separate results. Without that validator record presence only and `signature validation NOT CHECKED`; never infer whole-document validity from a signature field or parser success | D |
 | S7 | Text extraction and identifiers: full text to `EV-nnn_text.txt`; regex extraction of URLs, emails, phone numbers (E.164-looking), crypto addresses, `@handles` → `Identifiers_Found` table; each is a Lead | D |
 | S8 | Findings, inventory, custody, outputs (Phase 3) | — |
 
@@ -52,6 +52,8 @@ Validation and ingest:
 - Identifiers found in text are transcribed exactly and go to Leads; they are not looked up here (R9).
 - Prior-version text recovered from incremental PDF updates or tracked changes is a derived item; cite it as "text present in an earlier revision embedded in the file", never as "the author wrote".
 - Archives: list only; extract a member only if the case names it (intake field 7); encrypted members are listed with the encrypted flag and never brute-forced.
+- Run parsers offline in an isolated process with explicit input-byte, expanded-byte, member-count, nesting, memory and wall-time budgets. Reject absolute/traversal paths and link entries before any extraction; do not follow archive symlinks. Stop on budget exhaustion and retain coverage/error records. No parser may resolve document external relationships or signature-validation URLs unless a separately approved, controlled verification operation requires them.
+- Derive PDF revision counts from validated structural chains, never marker searches or `%%EOF` count minus one. Repaired/malformed/hybrid structures require a supported parser and a documented completeness result. A signature authenticates only its validated covered byte ranges under the configured trust policy; record uncovered bytes and later modifications separately.
 - Email files: headers are reproduced verbatim; the `Received:` chain is listed in order with the IPs transcribed (each an L1-IPA Lead); nothing is sent.
 
 ### 9.5 Task-specific self-healing cases
@@ -68,11 +70,11 @@ Validation and ingest:
 ### 9.6 Findings structure
 
 1. **File identity** — hashes, size, true type vs extension (EV refs).
-2. **Structure** — container summary; anomalies as facts (e.g. "3 incremental updates present").
+2. **Structure** — container summary, parser diagnostics, validated revision offsets/count and completeness; do not turn marker counts or repairs into established revision history.
 3. **Embedded metadata** — table verbatim; absent fields listed.
 4. **Revision traces** — table; derived prior-version items referenced.
 5. **Embedded content** — images/objects with hashes; macro/script presence; external-link targets.
-6. **Signatures** — presence and library-reported status.
+6. **Signatures** — presence, claimed signer, covered byte ranges, integrity, later modifications, trust/revocation policy and validation time as separate fields; unperformed checks remain NOT CHECKED.
 7. **Identifiers found in text** — table (Leads).
 8. Under **Analysis (outside ISO/IEC 27037 — opinion)** only: consistency observations (e.g. creation tool version vs claimed date), with the recommendation of a qualified document examiner for contested items.
 
@@ -93,7 +95,9 @@ Every identifier in `Identifiers_Found` (L1-WEB, L1-DOM, L1-EML, L1-PHN, L1-CRY,
 
 ### 9.10 Self-test specification
 
-Target: the repository fixture `selftest/L1-DOC_selftest.pdf` (SHA-256 `07abda698a6064a8a199d3580e0809b07b1320b4cb533522ca4e0f9e536d4719`, 2012 bytes) — one file, as in a real run; the Investigator attaches it (or the agent fetches it from the repository if CAP-NET). Assertions: hash equals the published value; true type `application/pdf`; 2 pages; `/Author` = `L1 SELFTEST`; `/Title` = `L1 SELFTEST DOCUMENT`; text extraction contains `ISO27037-SELFTEST-MARKER`; `Identifiers_Found` contains `https://example.com/selftest-page` and `selftest@example.com`; no macros present. A second fixture, `selftest/L1-DOC_selftest.docx` (SHA-256 `b20a6edb1200ab05234b88efdcddc405b46e864d6091b752f569cc3f0ca11163`, 36541 bytes; core author `L1 SELFTEST`, revision `3`), is provided for a separate manual run on the Office path.
+The versioned `selftest/L1-DOC.selftest.json` is the machine-readable assertion contract. Missing required fixtures, adapters or expected results yield INCOMPLETE, never PASS. Offline regression results and optional live-provider smoke results are reported separately.
+
+The existing fixture `selftest/L1-DOC_selftest.pdf` retains its published hash, size, 2-page metadata and marker checks. Required revision/signature regressions additionally cover a normal single-revision PDF (zero incremental updates), misleading EOF text, a validated incremental update, repaired/malformed xref data and a signed file with later modifications. Missing parser/signature capabilities yield INCOMPLETE/NOT CHECKED, not a guessed count or a valid signature verdict. The DOCX fixture separately tests Office metadata; success on PDF does not certify Office, archive or signature paths.
 
 ### 9.11 Lawful-request mapping
 

@@ -11,7 +11,7 @@ INPUT_TYPE: email address
 **Out of scope (→ Leads):** sending anything to the address; "forgot password" or registration probes on any platform (these can notify the mailbox owner and are prohibited by R2); full domain profile (L1-DOM); accounts found by handle (L1-USR).
 
 Validation:
-- One `@`; local part 1–64 chars; domain a valid hostname. Reject display-name forms (`Name <a@b>`) and ask for the bare address.
+- The default adapter supports a bare ASCII dot-atom local part and an IDNA domain; reject leading/trailing/consecutive local-part dots and control characters. Preserve input bytes/text. Display-name forms require the bare address. Quoted local parts (which may themselves contain `@`), address literals and SMTPUTF8 local parts are `UNSUPPORTED_BY_ADAPTER`, not proof that the mailbox is invalid; use a tested standards-aware adapter before investigating those forms. Do not validate an email by counting `@` characters alone.
 - Record exactly as given; lower-case the domain for lookups; keep the local part's case as given (and note that most providers treat it case-insensitively).
 - Plus-addressing (`user+tag@`) and dots in Gmail local parts: note the base form as a Lead, do not probe it.
 
@@ -21,11 +21,11 @@ Validation:
 
 | Source | Use | Level | Notes |
 |---|---|---|---|
-| DNS over HTTPS (MX, TXT/SPF, `_dmarc`) | Does the domain accept mail; policy | B | Two resolvers |
+| DNS over HTTPS (MX, A/AAAA, TXT/SPF, `_dmarc`) | Advertised routing/policy, not a mailbox-existence test | B | Two resolvers; retain DNS response status and distinguish null MX, no MX, NXDOMAIN and temporary failure |
 | RDAP `https://rdap.org/domain/<domain>` | Registration summary (dates, registrar) | B | Full profile is L1-DOM |
 | Public disposable-domain lists (e.g. the open-source `disposable-email-domains` list on GitHub, raw file) | Disposable classification | B | Third-party list; record list version/commit |
-| Gravatar `https://www.gravatar.com/avatar/<md5 of lower-cased address>?d=404` (image) and `https://api.gravatar.com/v3/profiles/<md5>` (public profile; verify availability) | Public avatar/profile linked to the address | B | 404 = none; profile only if public |
-| Have I Been Pwned API `https://haveibeenpwned.com/api/v3/breachedaccount/<address>?truncateResponse=false` with the agency's key (intake authorisation C) | Breach-exposure listing | B | **The website is never automated** (its terms and bot protection forbid it). Without an agency key the step is DEFERRED: the Investigator runs the website lookup post-run and records the result in VERIFICATION.md |
+| Gravatar `https://www.gravatar.com/avatar/<sha256>?d=404` (image) and `https://api.gravatar.com/v3/profiles/<sha256>` (public profile) | Source-reported avatar/profile for Gravatar's normalized email identifier | B | SHA-256 of the trimmed, lower-cased address is this provider's documented lookup key; the original mailbox identifier is not changed. A tested legacy MD5 avatar fallback is separate and disabled by default. Distinguish explicit 404 from blocked/auth/error responses |
+| Have I Been Pwned API `https://haveibeenpwned.com/api/v3/breachedaccount/<address>?truncateResponse=false` with the agency's key (intake authorisation C) | Breach-exposure listing | B | **The website is never automated**. Without secure authorized API access, DEFERRED: an investigator-directed post-run lookup produces a new captured artifact with its digest/time in a numbered sealed addendum referencing the earlier seal; a VERIFICATION.md working note alone does not verify it |
 | Search engines: `"<address>"` | Open-web mentions | C → A | Capture cited pages |
 | Search-engine queries scoped to code and paste hosts (e.g. `"<address>" github`, `"<address>" pastebin`) | Public code/paste mentions | C → A/B | GitHub's own code/commit search requires sign-in and is not used (R2) |
 | Paste/leak indexes via search engine | Mentions | C → A/B | Capture only; never transcribe credentials (R11); no login, no purchase |
@@ -35,7 +35,7 @@ Validation:
 | Step | Purpose | Level |
 |---|---|---|
 | S1 | Parse: local part, domain, plus-tag, role-address pattern (`info@`, `admin@`, `noreply@` …), free-mail provider recognition | — |
-| S2 | Domain mail layer: MX, SPF, DMARC, MTA-STS via DoH; RDAP summary | B |
+| S2 | Domain mail layer: save MX DNS status/answers, SPF, DMARC, MTA-STS and RDAP summary. A single `0 .` MX is NULL_MX_NO_SERVICE; NO_MX with successful DNS may use implicit A/AAAA routing, which is recorded without connecting to SMTP. NXDOMAIN, SERVFAIL/timeout and contradictory/mixed null-MX answers remain distinct | B |
 | S3 | Disposable / temporary-mail classification against a public list (record list source and date) | B |
 | S4 | Gravatar: avatar existence (status), avatar image captured if present, public profile JSON if present | B |
 | S5 | Breach exposure: HIBP API with the agency key (authorisation C), raw JSON saved; list breach names, dates and data classes as returned. No key → DEFERRED (post-run website lookup by the Investigator) | B |
@@ -46,10 +46,10 @@ Validation:
 ### 9.4 Task-specific capture rules
 
 - **Never send mail**, never request verification codes, never use "find friends"/"import contacts" features, never run account-existence tools that hit registration or password-reset endpoints. If the Investigator asks for this, refuse under R2 and record the request.
-- HIBP API responses are saved as raw JSON; breach names, dates and data classes are transcribed into the table with the EV ref. HIBP does not return the leaked data itself; do not go looking for it. The agency key is pasted only inside the code step, never echoed back, never stored in any output file.
-- Gravatar lookups use an MD5 of the lower-cased, trimmed address; record the hash used so the lookup is repeatable.
+- HIBP API responses are saved as raw JSON; breach names, dates and data classes are copied with their exact field path and EV ref. HIBP does not return the leaked data itself; do not go looking for it. The agency key is read through a named secret/environment reference supported by the host, never pasted into chat, code examples, logs, resume files or delivered artifacts. If secure input is unavailable, defer the keyed request.
+- Gravatar v3 profiles use SHA-256 of the trimmed, lower-cased address. Record the provider-specific normalization, algorithm and lookup key; keep the original local-part case in the case record. A profile/ avatar result is a provider association, not proof of mailbox control or a person. Capture the API version, HTTP status and returned identifier. Do not treat a Gravatar error page as absence.
 - Search queries are recorded verbatim; search result pages are captured before any result is opened.
-- Disclosure: sending the address to HIBP, Gravatar and search engines discloses it to those providers. That is intake authorisation A; if A = N, steps S4–S7 are SKIPPED and the report says so. No mid-run consent question is asked.
+- Disclosure: A is required for every target-bearing third-party request, including domain-bearing DNS/RDAP requests in S2 and Gravatar/HIBP/search in S4–S7. A=N means those network operations are SKIPPED; local parsing and matching against already-available, versioned lists may continue. An identifier hash is not a guarantee of anonymity. No key or provider approval overrides a denied disclosure permission.
 - Paste/leak pages: capture the page as a file; the evidence record says "contains credential material — restricted" where applicable; nothing from such a page is quoted, re-typed or searched further (R11).
 
 ### 9.5 Task-specific self-healing cases
@@ -57,7 +57,7 @@ Validation:
 | Symptom | Remedy to propose at G4 |
 |---|---|
 | HIBP API returns 401/429 | Check the key/rate limit once; otherwise DEFERRED (Investigator's manual website lookup post-run); never automate the website |
-| Domain has no MX | Record "domain does not advertise mail servers at <UTC>" — a fact, not proof the address is dead |
+| Successful DNS response has no MX | Record NO_MX and any captured A/AAAA fallback candidates; do not claim that no mail service or mailbox exists. A single `0 .` is NULL_MX_NO_SERVICE; NXDOMAIN, temporary failure and invalid mixed null-MX data are separate results |
 | Disposable list fetch fails | Use a second public list; else SKIPPED (optional context) |
 | Gravatar returns 200 for `d=404` variant anomalies | Save response headers; classify by content-type/size; re-check once |
 | Search engine returns personalised/localised results | Record the engine, locale, and that results vary; capture as seen |
@@ -66,7 +66,7 @@ Validation:
 ### 9.6 Findings structure
 
 1. **Address structure** — parse results; role/free-mail/disposable classification with basis (EV refs).
-2. **Domain mail configuration** — MX provider, SPF/DMARC strings verbatim; registration summary.
+2. **Domain mail configuration** — exact DNS status and MX classification, implicit routing candidates where applicable, SPF/DMARC strings and registration summary. MX host names do not by themselves establish the responsible mailbox provider.
 3. **Public avatar association** — Gravatar result (present/absent), image EV if present.
 4. **Breach-exposure listings** — table from S5 as returned by HIBP, with the explicit note that these are HIBP's records of third-party breaches; or "DEFERRED — see post-run steps" when no agency key was available.
 5. **Open-web mentions** — table of captured pages with context (one line each).
@@ -75,7 +75,7 @@ Validation:
 
 ### 9.7 XLSX sheets
 
-`Email_Parse` (field, value) · `Domain_Mail_Records` (record, value, resolver, UTC, EV) · `Breach_Exposure` (breach name, breach date, added date, data classes, EV) · `Web_Mentions` (URL, title, context, captured EV, SHA-256) · `Code_Mentions` (repo/URL, file, line context, EV).
+`Email_Parse` (raw address, raw local part, ASCII domain, supported syntax, comparison key, adapter/version) · `Domain_Mail_Records` (record, DNS status, value, routing classification, resolver, UTC, EV) · `Gravatar` (algorithm, lookup key, endpoint/version, status, returned identifier, EV) · `Breach_Exposure` (breach name, breach date, added date, data classes, EV) · `Web_Mentions` (URL, title, context, captured EV, SHA-256) · `Code_Mentions` (repo/URL, file, line context, EV).
 
 ### 9.8 Interpretation cautions
 
@@ -90,13 +90,13 @@ The domain (L1-DOM); handles equal to the local part (L1-USR); base form of plus
 
 ### 9.10 Self-test specification
 
-Target: `selftest@example.com`. Assertions: parse gives local part `selftest`, domain `example.com`, no plus-tag, not a role address; MX for `example.com` is the null MX `0 .` or empty → classification "domain does not advertise mail servers"; SPF TXT present or absent recorded (either is valid; drifts); RDAP summary registration date `1995-08-14T04:00:00Z`; disposable-list classification = not disposable; Gravatar avatar request for the MD5 of `selftest@example.com` returns HTTP 404; S5 is DEFERRED (no key) unless authorisation C provides one — with a key, the HIBP test address `account-exists@hibp-integration-tests.com` may be used instead and must return ≥ 1 breach; `skip: S6, S7`.
+The versioned `selftest/L1-EML.selftest.json` is the machine-readable assertion contract. Missing required observations, fixtures or adapters yield INCOMPLETE, never PASS. Required offline fixtures distinguish NULL_MX_NO_SERVICE (`0 .`), NO_MX with A/AAAA, NXDOMAIN, temporary failure and mixed invalid null-MX data; preserve `Alice@example.com` and `alice@example.com` as distinct by default; reject malformed dot-atoms and mark quoted/SMTPUTF8 input unsupported rather than nonexistent. Gravatar request fixtures use a 64-hex SHA-256 key for v3 and distinguish 404, 401, 429 and HTML bot walls. Optional live smoke target: `selftest@example.com`; S5 is DEFERRED without secure authorized credentials. `skip: S6, S7`.
 
 ### 9.11 Lawful-request mapping
 
 | Lead type | Recipient | Request type default | Identifiers to cite | Ask for |
 |---|---|---|---|---|
-| Mailbox holder identity and logs | the mail provider (MX host operator for the domain; the domain's registrant for custom domains) | preservation, then disclosure (subscriber/registration data) | address as given, domain, MX hosts, capture UTC | account registration data, login IP logs, recovery contacts |
+| Mailbox holder identity and logs | the responsible mailbox provider verified by the agency; MX operators may be filtering/relay services and registrants are not automatically mailbox custodians | preservation, then disclosure (subscriber/registration data) | address as given, domain, MX hosts, capture UTC | account registration data, login IP logs, recovery contacts |
 | Accounts registered with this address on platforms named in the case | each platform | preservation | address, platform, UTC | account existence and registration data |
 
 ### 9.12 Duration estimate

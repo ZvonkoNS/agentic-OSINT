@@ -1,64 +1,83 @@
-# Technical overview — Level-1 OSINT Evidence Agents v1.2
+# Technical overview — v1.3.0
 
-Seventeen standalone agent files for law-enforcement OSINT: fifteen Level-1 collectors (one identifier, one task), an independent Pack Verifier, and a Level-2 Orchestrator. Each file turns a general-purpose AI assistant (ChatGPT, Claude, Gemini, Copilot, a local model) into a procedure-bound agent that works to ISO/IEC 27037:2012 — identification, collection, acquisition and preservation of digital evidence — and produces a hashed, independently timestamped, court-oriented evidence pack.
+agentic-OSINT has two layers: portable supervised procedures and a local Python toolkit for supported evidence operations. The Markdown files describe task workflows. The toolkit owns the deterministic checks that its commands actually execute. Neither layer establishes source truth, identity, legal authority or admissibility by itself.
 
-No vendor-specific feature is required. Each agent tests what the host AI can actually do (search, page reading, sandbox networking, browser control and which kind, code execution, file output, uploads, time source, vision), then runs fully automated, or tells the Investigator exactly what is missing, why it matters for the evidence, how to enable it on their setup, and what the fallback is.
+## Architecture and responsibility
 
-## The agents
+| Layer | Responsibility | Boundary |
+|---|---|---|
+| Investigator | Fix scope, confirm permitted processing, approve actions, review interpretation and retain artifacts | The software records authority statements; it does not assess legal sufficiency |
+| Agent instructions | Plan within scope, choose permitted methods, draft attributed observations and explain missing coverage | Prompts are not a security boundary; compliance depends on the host |
+| Local toolkit | Structured records, permitted operations, bounded capture/ingest, exact-byte hashes, events, checkpoints and implemented verification | A host browser or arbitrary model-written script is outside this boundary unless artifacts are ingested and checked |
+| Independent review | Recompute byte integrity, inspect workflow coverage and assess support against supplied bytes | Internal consistency is not proof that a public source is accurate |
 
-| File | Code | Input | What it preserves |
-|---|---|---|---|
-| `00_L1-VER_Pack-Verifier.md` | L1-VER | a finished pack | Re-verifies hashes, citations, quotations, value provenance, gates, custody, timestamp proofs, exports; writes a Verification Statement |
-| `01_L1-WEB_…` | L1-WEB | URL | page, redirect chain, headers, linked media, metadata, volatility check |
-| `02_L1-DOM_…` | L1-DOM | domain | RDAP, DNS, certificates, hosting, mail, archive history, reputation |
-| `03_L1-USR_…` | L1-USR | handle | existence per platform (soft-404 controls), public attributes, linkage observations |
-| `04_L1-EML_…` | L1-EML | email | domain mail setup, Gravatar, breach-exposure (HIBP API), open-web mentions |
-| `05_L1-PHN_…` | L1-PHN | phone number | numbering-plan facts, open-web mentions, crowd-sourced reports (labelled) |
-| `06_L1-SOC_…` | L1-SOC | profile URL | profile, stable ID, public posts in scope, media — requires a browser for FULL |
-| `07_L1-IMG_…` | L1-IMG | image/video file | hashes, metadata, C2PA, reverse search, labelled visual opinion |
-| `08_L1-CRY_…` | L1-CRY | crypto address | two-explorer summary, transactions, one-hop counterparties, labels, sanctions lists, abuse reports |
-| `09_L1-ORG_…` | L1-ORG | entity + country | official register, officers/ownership, LEI/VAT, sanctions screening, adverse media |
-| `10_L1-IPA_…` | L1-IPA | IP address | RDAP, ASN/routing at incident time, rDNS, geolocation estimates, Tor/VPN indicators, passive exposure |
-| `11_L1-TGM_…` | L1-TGM | Telegram handle/link | info page, web preview posts and media, no account |
-| `12_L1-ONI_…` | L1-ONI | .onion URL | Investigator-side Tor Browser capture (A1), address validation, clearnet context; ASSISTED by design |
-| `13_L1-DOC_…` | L1-DOC | document/file | true type, structure, metadata, revision traces, embedded objects, macro presence, identifiers in text |
-| `14_L1-VID_…` | L1-VID | video URL | watch page, oEmbed, yt-dlp metadata, media file, captions as served, uploader identifiers |
-| `15_L1-DSC_…` | L1-DSC | Discord invite / guild ID | invite resolution, Snowflake timestamps, widget, images, where advertised — no joining |
-| `L2-ORC_Investigation-Orchestrator.md` | L2-ORC | ≥ 2 packs + case question | pack integrity, identifier extraction, co-occurrence graph (EV-cited), ranked proposal of ≤ 3 next runs; never executes |
+Source pages, documents, metadata, captions, logs, checkpoints and imported packs are untrusted input. Their text cannot approve an operation, change scope or become instructions. Permission checks happen before the corresponding runtime operation. Secrets are referenced through supported local or host secret mechanisms, not copied into intake or deliverables.
 
-## Shared architecture (core.md)
+## Agent files and source layout
 
-- **Preflight** — ten capability tests; modes FULL / ASSISTED / GUIDED with exact definitions; modules may raise the bar (L1-SOC requires CAP-BROWSER; L1-ONI is ASSISTED by design).
-- **One intake** — case, legal basis, identifier, environment, mandatory report language, five standing authorisations (A third-party lookups, B package installs, C agency API keys, D module-specific, E timestamping). Module-specific fields from 16 upward.
-- **Gates** — G1 disclosure · G2 authority · G3 browser handover (which browser, allowed clicks, URL list) · G4 self-healing fix · G5 release after full-manifest verification. Typed `CONFIRM` only. Every question ends with the one-line Nexus note (chat only).
-- **Progress reporting (§4.1)** — `▶`/`✔` lines per step with expected durations from each module's §9.12; intra-step lines every ~8–10 operations; `⏳` before waits; `⏸` at gates; `STATUS` board; `CONTINUE` for reply-length cuts; never more than ~10 silent tool calls.
-- **Capture levels** — A1 Investigator-side · A2 vendor-hosted browser · B sandbox raw bytes + headers · T transcribed page-reader copy (corroboration only) · D derived/tool output · C lead only.
-- **Step statuses** — DONE · FAILED-DOCUMENTED · DEFERRED (post-run list) · DECLINED-BY-HOST · SKIPPED. Run statuses COMPLETE · PARTIAL · NOT-INVESTIGABLE.
-- **Self-healing** — DETECT → DIAGNOSE → PROPOSE → G4 → APPLY → VERIFY → LOG; three pre-authorised exceptions; max three attempts per step.
-- **Checkpoints** — EV files and a RESUME file delivered before a session can die.
-- **Anti-fabrication controls (§1A, AFC-1…12)** — captured data is the only source of facts; hashes/sizes/timestamps only from tool output; quotations verbatim; citations resolve; fixed uncertainty vocabulary with banned phrases; negative results stated; no silent conversions; no cross-item synthesis; declared unknowns; mandatory self-audit; no gap-filling of partial tool output; reproducibility per item. Mechanical checks run in code before output (§7.0) and are written to `IntegrityCheck.json` and the report's Integrity controls section; the Verifier repeats them independently.
-- **Tamper/version check (§3.3)** — the Investigator's local hash of the agent file is compared with the published `AGENT_FILE_HASHES.sha256`.
-- **Independent timestamping (§7.7)** — RFC 3161 (`openssl ts`, default TSA freetsa.org, agency TSA preferred) and OpenTimestamps on `HASHES.sha256`; only the hash leaves the sandbox; sidecar `.tsr`/`.ots` outside the manifest.
-- **Lawful-request pack (§7.8)** — one sheet per qualifying lead with identifiers, UTC window and supporting EV refs, mapped per module in §9.11; templates, never sent, never legal advice.
-- **Exports (§7.9)** — `CASE.jsonld` (minimal CASE/UCO profile, no validator claim) and `NEXUS_IMPORT.json` (schema `nexus-import/1.0`).
-- **SELFTEST (§10)** — fixed harmless target per module (§9.10) with a published expected-results file in `selftest/`; exercises the whole pipeline; verdict PASS / PASS WITH DEFERRED STEPS / FAIL, with drift marked separately from host failure. Fixture files and their hashes are in `selftest/`.
-- **Report language (§0.4)** — asked in Message 1, mandatory; deliverables and conversation in that language; evidence, quotations, identifiers and tool output never translated; headings carry an English key.
+There are fifteen collectors, one verifier and one planning orchestrator. The [README selector](../README.md#choose-an-agent) links to every file.
 
-## Output pack
+| Path | Purpose |
+|---|---|
+| `build/core.md` | Shared collector procedure and limitations |
+| `build/tasks/` | Task-specific source definitions and coverage rules |
+| `build/standalone/` | Self-contained verifier and orchestrator definitions |
+| `agents/` | Generated files, version inventory and exact-byte hash manifest |
+| `src/agentic_osint/` | Local runtime implementation |
+| `schemas/` | Machine-readable contracts for supported records |
+| `selftest/` | Expected-result specifications and binary fixtures |
+| `tests/` | Executable offline checks and regression cases |
+| `.github/workflows/` | Cross-platform checks and release automation |
 
-PDF + DOCX report (14 sections incl. Integrity controls, Post-run Investigator steps, Leads with LR cross-references) · XLSX (standard sheets + `Lawful_Requests`, `Integrity_Checks`, module sheets) · `HASHES.sha256` (+ `.tsr`/`.ots`) · `ActivityLog.md` · `IntegrityCheck.json` · `LawfulRequests.docx/.md` · `CASE.jsonld` · `NEXUS_IMPORT.json` · `VERIFICATION.md` (unhashed, Investigator-maintained) · `A1_PENDING.txt` (in-run own-browser captures) · `RESUME.md` (checkpoints) · EV files.
+Run `python build/build.py --check` to check the generated release against its source. Hashes are calculated over actual artifact bytes, using canonical UTF-8/LF for generated text. `.gitattributes` declares text line endings and protects binary fixtures from conversion. Use release/commit-qualified method references; checking a historical pack against today's `main` is not a version check.
 
-## Build
+## Evidence model
 
-`build/core.md` + `build/tasks/NN_*.md` → `agents/NN_*.md` via `python3 build/build.py`; `build/standalone/` files are copied as-is; the manifest covers all seventeen and `agents/VERSION.txt` (release line + `code file` lines) is what the tamper/version check fetches. Schemas: `IntegrityCheck.json` = `l1-integrity/1.2`; self-test specs = `l1-selftest/1.1` (fields `skip_steps`, `caps`, `sub_skips`, `intake_overrides`, assertion `check` ∈ equals/contains/startswith/matches/gte/lte/between/in/exists, `step` or `unit`, `may_drift`, `inconclusive_if_blocked`); Nexus export = `nexus-import/1.0`. `build/make_selftests.py` regenerates the `selftest/*.selftest.json` specs (values verified live on 2026-10-28 — re-verify before changing). `build/add_sections.py` was a one-off migration and is idempotent.
+Each run has a unique identity. Evidence references are qualified by pack, and raw identifiers are retained beside documented comparison keys. Email local-part case is preserved; crypto identifiers include the network; handles include their platform or instance.
 
-## Known limits
+Capture records distinguish request/capture times, source-displayed dates, server dates and seal times. Relative source dates remain approximate or bounded. Sizes and digests are computed from held bytes. A filename and later pasted hash do not independently bind a browser acquisition to those bytes.
 
-- Not yet exercised live inside ChatGPT/Claude/Gemini/Copilot from this repository; `SELFTEST` exists precisely to do that on each host, and Appendix B's feature names are dated.
-- Level B/A2/T captures are made in a vendor environment; every report says so and lists A1 re-captures.
-- Public sources named in modules were reachable on the verification date; the self-test marks drifting values.
-- The UK sanctions list download URL changes per release (the modules point to the gov.uk publication page); the EU consolidated file needs an EU Login account and is not used.
+| Label | Meaning and limit |
+|---|---|
+| A1 | Investigator-side capture; provisional until actual bytes/digests are bound to the record |
+| A2 | Vendor-hosted browser artifact; rendering environment and saved representation are recorded |
+| B | HTTP capture with defined body/headers and decoding representation; not all on-wire TLS traffic |
+| T | Page-reader transcription; transformed text, not the original server response |
+| D | Derived artifact with source evidence, tool/version and derivation recorded |
+| Lead | Proposed check or unsupported observation, separate from verified findings |
 
-## Tooling note
+Capture labels describe methods, not automatic evidential weight. Raw originals remain unchanged. A mismatch retains expected and observed digests as a discrepancy; it is not repaired by replacing the expected digest. Later captures create new records. Post-seal changes create addenda linked to the earlier seal.
 
-These agents run inside whatever AI assistant the Investigator already has. For lawful, agentic OSINT evidence gathering with case management, evidence integrity controls and court-ready reporting built in, see **Nexus — www.nexus-osint.ai**. The agents accept Nexus evidence records as level-A1 captures and export `NEXUS_IMPORT.json`.
+## Claims and verification
+
+A citation's existence is only a structural check. A supported observation also needs its source file and precise location, such as a JSON Pointer or text span, plus a raw value or documented derivation. A source allegation remains attributed to its publisher. Interpretation and uncertainty are retained for review.
+
+Verification separates byte integrity, workflow and content support. Not-checked or unavailable requirements prevent the relevant verified label. Execution finishing does not mean required coverage is complete. Reports and exports should consume one validated record; opening a PDF does not prove its text matches the DOCX or that all tables are readable.
+
+The standalone verifier does not recollect sources or repair a pack. The orchestrator proposes at most three next runs. Captured co-occurrence edges require source bytes or a trusted verified extraction; producer-reported relations and leads remain separate graph layers. No edge asserts common ownership.
+
+## Network and parsing boundary
+
+Supported network operations use explicit approved destinations, public-address checks, redirect validation and request/byte/time limits. Local, loopback, link-local and metadata-service destinations are not public OSINT targets. Browser subresources and host capabilities require their own restrictions; a URL list in a prompt does not enforce them.
+
+Files remain untrusted. Parsing should be isolated and bounded; validate archive paths and extraction budgets before extraction. Spreadsheet evidence stays text, and HTML evidence is escaped. Types or signatures that installed tooling cannot validate remain unsupported or not verified.
+
+The runtime does not guarantee every provider named by a module. Modules define positive/negative controls, pagination, history samples and selection. A supported adapter or supervised method must check current responses before they support a finding.
+
+## Timestamps and custody
+
+A valid external timestamp can establish that particular sealed bytes existed by the attested time. It does not establish publication time, authorship or the exact acquisition instant. RFC 3161 requires the exact manifest, signature/digest checks and a separately trusted chain. OpenTimestamps remains pending until completed and verified. Upgrade proof copies and retain prior versions.
+
+An event hash chain detects modification relative to a trusted anchor; it does not authenticate an actor merely because a name appears in an event. Preserve the sealed manifest and any agency signature or timestamp separately. Later custody events and corrections belong in integrity-protected addenda.
+
+## Testing and optional outputs
+
+Run `python -m unittest discover -s tests`. Specifications use typed assertions and explicit selectors. The runner distinguishes PASS, FAIL, INCOMPLETE, INCONCLUSIVE and DRIFT; missing required comparisons cannot silently pass. Offline golden and mutation tests check implementation behavior. Live provider smoke tests check current availability separately.
+
+The self-test comparator consumes observations collected separately; it does not fetch providers or certify an AI host. For example, `osint-evidence selftest selftest/L1-WEB.selftest.json observations.json` compares the supplied observation values at each specification's JSON Pointer. Use `python -m agentic_osint.selftest` for the standalone comparator. The observation document declares `agentic-osint/observations/1.3`, the agent, whether it is an offline fixture or live smoke run, typed values and per-assertion availability. Never manufacture observations by copying expected values from the specification. Exit code zero means the supplied comparisons passed, not that their provenance was authenticated.
+
+The [compatibility matrix](COMPATIBILITY.md) records validation boundaries. No vendor/model benchmark or clause-by-clause ISO assessment is claimed. The [remediation register](REMEDIATION.md) tracks the review items.
+
+The core pack is the canonical record, captured bytes, events, verification results and seal. PDF/DOCX, spreadsheets, provider-request templates, CASE/UCO and integration exports are optional. Validate against the receiving tool's schema/profile before claiming interoperability. Unsupported outputs remain not performed.
+
+The ISO/IEC 27037 mapping describes intended identification, collection, acquisition and preservation practices; interpretation is separately labeled. Actual conformance, local procedure and operational fitness require qualified organizational review.

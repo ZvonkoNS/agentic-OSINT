@@ -1,8 +1,13 @@
 {
-  "schema": "l1-selftest/1.1",
+  "schema": "l1-selftest/1.3",
   "agent": "L1-WEB",
-  "agent_version": "1.2",
-  "verified_on": "2026-10-28",
+  "agent_version": "1.3.0",
+  "historical_baseline_date": "2026-10-28",
+  "validation": {
+    "live_provider_verified": false,
+    "host_matrix": [],
+    "scope": "Compares supplied observations; does not generate them or certify a host."
+  },
   "target": "https://example.com/",
   "skip_steps": [],
   "caps": {},
@@ -16,6 +21,8 @@
       "id": "WEB-01",
       "step": "S2",
       "description": "final HTTP status",
+      "path": "/values/S2/final_http_status",
+      "required": true,
       "check": "equals",
       "expect": 200
     },
@@ -23,6 +30,8 @@
       "id": "WEB-02",
       "step": "S2",
       "description": "redirect hops",
+      "path": "/values/S2/redirect_hops",
+      "required": true,
       "check": "equals",
       "expect": 0
     },
@@ -30,6 +39,8 @@
       "id": "WEB-03",
       "step": "S3",
       "description": "page title",
+      "path": "/values/S3/page_title",
+      "required": true,
       "check": "equals",
       "expect": "Example Domain"
     },
@@ -37,6 +48,8 @@
       "id": "WEB-04",
       "step": "S2",
       "description": "DNS A answers for example.com",
+      "path": "/values/S2/dns_a_answers_for_example_com",
+      "required": true,
       "check": "gte",
       "expect": 1,
       "may_drift": true
@@ -45,6 +58,8 @@
       "id": "WEB-05",
       "step": "S4",
       "description": "directly linked resources",
+      "path": "/values/S4/directly_linked_resources",
+      "required": true,
       "check": "equals",
       "expect": 0
     },
@@ -52,6 +67,8 @@
       "id": "WEB-06",
       "step": "S6",
       "description": "Wayback closest snapshot timestamp",
+      "path": "/values/S6/wayback_closest_snapshot_timestamp",
+      "required": true,
       "check": "matches",
       "expect": "^\\d{14}$",
       "may_drift": true
@@ -59,9 +76,11 @@
     {
       "id": "WEB-07",
       "step": "S7",
-      "description": "volatility result",
+      "description": "text volatility result",
+      "path": "/values/S7/text_volatility_result",
+      "required": true,
       "check": "equals",
-      "expect": "STABLE"
+      "expect": "TEXT_UNCHANGED"
     }
   ]
 }

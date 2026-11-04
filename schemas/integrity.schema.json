@@ -1,0 +1,179 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:agentic-osint:schema:integrity:1.3",
+  "title": "agentic-OSINT integrity 1.3",
+  "type": "object",
+  "properties": {
+    "schema": {
+      "const": "agentic-osint/integrity/1.3"
+    },
+    "pack_id": {
+      "anyOf": [
+        {
+          "type": "string",
+          "format": "uuid"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "result": {
+      "enum": [
+        "PASS",
+        "FAIL",
+        "INCOMPLETE",
+        "REVIEW_REQUIRED"
+      ]
+    },
+    "byte_integrity": {
+      "enum": [
+        "PASS",
+        "FAIL",
+        "INCOMPLETE"
+      ]
+    },
+    "workflow": {
+      "enum": [
+        "RECORDED",
+        "FAIL",
+        "INCOMPLETE",
+        "NOT_CHECKED"
+      ]
+    },
+    "content_support": {
+      "enum": [
+        "SUPPORTED_VALUES",
+        "REVIEW_REQUIRED",
+        "FAIL",
+        "INCOMPLETE",
+        "NOT_CHECKED"
+      ]
+    },
+    "missing_required_steps": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      },
+      "minItems": 0
+    },
+    "failures": {
+      "type": "array",
+      "items": {
+        "type": "object"
+      },
+      "minItems": 0
+    },
+    "claims": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "minLength": 1
+          },
+          "result": {
+            "enum": [
+              "SUPPORTED_VALUE",
+              "REVIEW_REQUIRED"
+            ]
+          },
+          "evidence_id": {
+            "type": "string",
+            "pattern": "^EV-[1-9][0-9]*$"
+          },
+          "file": {
+            "type": "string",
+            "minLength": 1,
+            "pattern": "^(?!/)(?!.*:)(?!.*(?:^|/)\\.{1,2}(?:/|$))[^\\\\\\u0000]+$"
+          },
+          "selector": {
+            "oneOf": [
+              {
+                "type": "object",
+                "properties": {
+                  "type": {
+                    "enum": [
+                      "text"
+                    ]
+                  },
+                  "start": {
+                    "type": "integer",
+                    "minimum": 0
+                  },
+                  "end": {
+                    "type": "integer",
+                    "minimum": 0
+                  }
+                },
+                "required": [
+                  "type",
+                  "start",
+                  "end"
+                ],
+                "additionalProperties": false
+              },
+              {
+                "type": "object",
+                "properties": {
+                  "type": {
+                    "enum": [
+                      "json"
+                    ]
+                  },
+                  "pointer": {
+                    "type": "string",
+                    "pattern": "^(?:/(?:[^~]|~[01])*)*$"
+                  }
+                },
+                "required": [
+                  "type",
+                  "pointer"
+                ],
+                "additionalProperties": false
+              }
+            ]
+          },
+          "value": {},
+          "meaning": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "required": [
+          "id",
+          "result",
+          "evidence_id",
+          "file",
+          "selector",
+          "value",
+          "meaning"
+        ],
+        "additionalProperties": false
+      },
+      "minItems": 0
+    },
+    "limitations": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      },
+      "minItems": 0
+    }
+  },
+  "required": [
+    "schema",
+    "pack_id",
+    "result",
+    "byte_integrity",
+    "workflow",
+    "content_support",
+    "failures",
+    "claims",
+    "limitations"
+  ],
+  "additionalProperties": false
+}

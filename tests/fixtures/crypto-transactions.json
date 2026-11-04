@@ -1,0 +1,33 @@
+{
+  "fixture_kind": "offline_synthetic_transactions",
+  "chain": "BTC",
+  "target_address": "1A1zP1eP5QGefi2DMPTfTL5SLmv7DivfNa",
+  "unit": "satoshi",
+  "coverage": "sampled",
+  "transactions": [
+    {
+      "id": "synthetic-multi-input-output",
+      "inputs": [
+        {"address": "1A1zP1eP5QGefi2DMPTfTL5SLmv7DivfNa", "value": 100000},
+        {"address": "other-input", "value": 50000}
+      ],
+      "outputs": [
+        {"address": "1A1zP1eP5QGefi2DMPTfTL5SLmv7DivfNa", "value": 38000},
+        {"address": "recipient-one", "value": 60000},
+        {"address": "recipient-two", "value": 51000}
+      ],
+      "fee": 1000,
+      "expected_target_net_delta": -62000,
+      "counterparty_allocation": "not established"
+    },
+    {
+      "id": "synthetic-self-transfer",
+      "inputs": [{"address": "1A1zP1eP5QGefi2DMPTfTL5SLmv7DivfNa", "value": 100000}],
+      "outputs": [{"address": "1A1zP1eP5QGefi2DMPTfTL5SLmv7DivfNa", "value": 99000}],
+      "fee": 1000,
+      "expected_target_net_delta": -1000,
+      "counterparty_allocation": "not established"
+    }
+  ],
+  "limitations": "Synthetic labels and transaction IDs are not on-chain evidence. Co-occurring inputs and outputs do not establish a unique per-party flow. No immutable assertion is made about payments to the example address."
+}

@@ -10,12 +10,12 @@ INPUT_TYPE: Telegram handle or link (t.me/<name>, t.me/s/<name>, @<name>, or an 
 **In scope:** the public info page `t.me/<name>` (title, description, subscriber/member count, photo); for public channels, the web preview `t.me/s/<name>` (recent posts, views, dates, forwarded-from labels, media); for public users and groups, whatever the info page shows; invite-link preview pages (what is visible before joining).
 **Out of scope (→ Leads or prohibited):** joining anything; using a Telegram account, the official app, Telegram Desktop, Bot API or MTProto API (all require an account — R2); private channels/groups beyond the invite preview; member lists; message history older than the preview offers; "view in Telegram" buttons.
 
-**Intake additions (printed with the form):** field **16** = "Post scope: the N most recent posts in the web preview (default 50; the preview itself caps what is public) or a date range". Authorisation **D: none**.
+**Intake additions (printed with the form):** field **16** = "Scope: supplied post only, or an explicitly approved channel range/N posts (channel input default 50; a post URL defaults to that post only)". Authorisation **D: none**.
 
 Validation:
 - Accept `t.me/<name>`, `t.me/s/<name>`, `telegram.me/<name>`, `@<name>` (name: 5–32 chars, letters/digits/underscore), or an invite `t.me/+<hash>` / `t.me/joinchat/<hash>`. Normalise to `<name>` or `invite:<hash>`; record as given.
 - `t.me/c/<id>/<n>` links point to private content and are `NOT-INVESTIGABLE` without an account; say so (core §3.1) and produce the short pack.
-- A post link `t.me/<name>/<n>` is accepted: the channel is the target, the post number is recorded as the item of interest.
+- A post link `t.me/<name>/<n>` is a single-post target by default: preserve that exact post first. Extracting the channel name does not authorize recent-post or channel-wide collection. Ask at intake if the Investigator wants an explicit wider range, record that scope, and never expand silently.
 
 ### 9.2 Sources
 
@@ -32,9 +32,9 @@ Validation:
 
 | Step | Purpose | Level |
 |---|---|---|
-| S1 | Normalise; detect type (channel / user / group / invite / private); print the source list and the post scope | — |
+| S1 | Preserve input; detect type (single post / channel / user / group / invite / private); print the exact approved post IDs/range/N, request/page/time budgets and source list | — |
 | S2 | Info page capture: raw page + headers; extract title, `@name`, description, subscriber/member count (as displayed, e.g. "9 230 981 subscribers"), photo URL (captured as a file), presence of the "Preview channel" button | B (A via G3) |
-| S3 | Preview capture (public channels only): page 1 of `t.me/s/<name>`; paginate with `before=` until the scope is reached; each page a separate EV item; extract per post: post number, permalink `t.me/<name>/<n>`, datetime from the `<time datetime>` attribute (UTC), text, views as displayed, forwarded-from label, reply-to, media presence | B (A via G3) |
+| S3 | Capture the supplied post first for a single-post target. For an approved channel scope, capture preview pages with `before=` until the scope or budget is reached. Save each page, requested/returned cursor, first/last post IDs, unique captured IDs, observed gaps and omissions. Extract permalink, exposed stable channel identifier if present with its exact source field, datetime, text, views, forwarded label and media presence | B (A via G3) |
 | S4 | Media: download the media files the preview exposes for captured posts (photos; video where a direct URL is present); each an EV item; cap 25 files / 100 MB; remainder listed | B |
 | S5 | Links and mentions: outbound URLs, `@handles`, hashtags, invite links in captured posts — table only | D |
 | S6 | Volatility re-check: second fetch of the info page at the end of the run (count, title, description) | B |
@@ -48,6 +48,7 @@ Validation:
 - Post timestamps come from the `datetime` attribute (ISO 8601, UTC) — record them as `captured`; the displayed relative form is recorded separately.
 - Views are rounded by Telegram ("12.3K"); record as displayed.
 - Forwarded-from labels name another channel as displayed; the other channel is a Lead, never profiled here.
+- Handles and display names are mutable; record stable channel identifiers only when the public source actually exposes them. Never infer one from a handle or treat a numeric item in unrelated markup as authoritative. Gaps mean `not present in captured preview`, not proof of deletion. Retain requested-post failure separately from successful capture of another post.
 - Invite links: the preview page shows the title and member count without joining; capture it and stop. Never click "Join".
 
 ### 9.5 Task-specific self-healing cases
@@ -55,7 +56,7 @@ Validation:
 | Symptom | Remedy to propose at G4 |
 |---|---|
 | `t.me/s/<name>` returns the info page only | The channel is not public-previewable (user, group, or restricted channel): record it; S3–S5 are `SKIPPED` with the reason `not accessible without authentication`; Lead: lawful request |
-| Preview pagination stops early | Record the extent reached; note "preview limited by Telegram" |
+| Preview pagination stops early | Record cursors, captured IDs, first/last ID, elapsed/page budget and gaps; mark requested but missing scope INCOMPLETE, without assuming deletion |
 | Media URL expires / 403 | Capture the post page with the media visible (A via G3 if available); record `media not separately captured` |
 | Rate limited / 429 | Pause 60 s; reduce pagination speed |
 | Channel renamed (redirect) | Record both names and the redirect; continue with the current one; old name in Leads |
@@ -63,7 +64,7 @@ Validation:
 ### 9.6 Findings structure
 
 1. **Target identity** — type, `@name`, title, description, counts as displayed, photo (EV refs).
-2. **Public posts within scope** — count captured, date span, media count; table in the XLSX; short exact excerpts only for posts named in intake field 7.
+2. **Public posts and coverage** — requested post/range, unique IDs captured, date span, cursors/pages, gaps, media counts and omissions. A single-post target never becomes a recent-channel summary. Short excerpts cite the specific post evidence.
 3. **Forwards, links, mentions** — tables.
 4. **Not accessible** — what Telegram did not show without an account.
 5. **Stability** — S6 result.
@@ -86,7 +87,9 @@ Forwarded-from channels and mentioned handles (separate L1-TGM runs); outbound l
 
 ### 9.10 Self-test specification
 
-Target: `t.me/telegram` (Telegram's own official news channel). Assertions: info page HTTP 200; title displayed equals `Telegram News`; `@telegram` present; subscriber count displayed matches `\d[\d\s,.]*\s*subscribers` (value drifts — pattern only); preview `t.me/s/telegram` HTTP 200 with ≥ 10 posts on page 1; every captured post has an ISO datetime; ≥ 1 media file captured; S7 skipped (`skip: S7` — search-engine step not needed for the test).
+The versioned `selftest/L1-TGM.selftest.json` is the machine-readable assertion contract. Missing required fixtures, adapters or expected results yield INCOMPLETE, never PASS. Offline regression results and optional live-provider smoke results are reported separately.
+
+Required offline fixtures cover a single-post input, explicit channel-range input, renamed handle, repeated pagination cursor and missing preview IDs. Assert that a single-post input captures only that post unless a wider range was approved, no repeated cursor loops forever and missing IDs do not become deletion findings. Optional live target `t.me/telegram` may test current public preview availability within a small budget; its title, counts, pagination and media are captured observations, not permanent expected facts.
 
 ### 9.11 Lawful-request mapping
 

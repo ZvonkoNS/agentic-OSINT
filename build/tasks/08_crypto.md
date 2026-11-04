@@ -2,17 +2,17 @@
 AGENT_NAME: Cryptocurrency Address Tracing Agent
 AGENT_CODE: L1-CRY
 FILE: 08_L1-CRY_Cryptocurrency-Address-Tracing.md
-PURPOSE: Document the on-chain record of one cryptocurrency address from public block explorers — balance, transaction history, direct counterparties, public labels, sanctions-list and abuse-report matches — as hashed evidence, without clustering claims.
+PURPOSE: Document the on-chain record of one cryptocurrency address — provider summaries, transactions, supported transfers or input/output co-occurrences, public labels and screening results — without clustering or invented fund-flow attribution.
 INPUT_TYPE: cryptocurrency address (Bitcoin, Ethereum/EVM, Tron, Litecoin, Solana, XRP, Bitcoin Cash, Dogecoin; Monero is accepted but documented as not traceable) — for an EVM address, name the chain(s) in field 7
 -->
 ### 9.1 Scope and input validation
 
-**In scope:** chain detection and checksum validation; address summary from at least two independent public explorers; full or capped transaction export; direct counterparties (one hop, derived from the export); public labels/tags shown by explorers; sanctions-list address matching; public abuse-report listings.
+**In scope:** chain/network identification and supported address validation; address summary from at least two independent public explorers; full or explicitly sampled transaction export; transaction co-occurrences and target-address balance changes; direct transfers only where the chain record supports them; public labels, sanctions-list address screening and public abuse-report listings.
 **Out of scope (→ Leads):** clustering/common-ownership heuristics, multi-hop tracing, exchange attribution beyond public labels, deanonymisation, contacting exchanges (lawful request path is a Lead), price valuation beyond a captured rate.
 
 Validation (do in code if CAP-CODE):
 - Detect format: BTC (`1…` P2PKH, `3…` P2SH, `bc1q…` bech32, `bc1p…` taproot), LTC (`L…`, `M…`, `ltc1…`), BCH (`q…`/`bitcoincash:`), DOGE (`D…`), ETH/EVM (`0x` + 40 hex; EIP-55 checksum if mixed case), TRX (`T…` base58, 34 chars), SOL (base58, 32–44 chars), XRP (`r…`), XMR (`4…`/`8…`, 95 chars).
-- Validate the checksum with a proper library: `base58` (base58check), `bech32` (bech32/bech32m), and for EIP-55 a real Keccak-256 (`pycryptodome` → `Crypto.Hash.keccak`, or `eth-hash`/`eth-utils`; **`hashlib.sha3_256` is NIST SHA-3, not Keccak, and gives wrong results**). Install under authorisation B. If no library can be installed, record "checksum not verified" and continue. A checksum that a library verifies as **invalid** stops the run with an explanation (do not "correct" it).
+- Use a versioned, chain-specific validator with golden valid/invalid vectors. A generic Base58 decoder is not validation for XRP, Solana, Monero or BCH; Solana has no address checksum to verify. For Bitcoin witness v0 require Bech32 and its witness-program constraints; witness v1+ requires Bech32m. EIP-55 requires real Keccak-256, never `hashlib.sha3_256`. Record validator/version, network, decoded format and the actual result. If the adapter does not support the supplied format, record `validation unsupported` and mark required validation INCOMPLETE; do not substitute a guessed checksum algorithm or reject a valid address on that basis. A supported validator returning invalid ends the run as `NOT-INVESTIGABLE`; preserve the original input.
 - EVM ambiguity: an `0x` address exists on every EVM chain. If intake field 16 names the chain(s), use them. Otherwise run Ethereum mainnet only and state in Findings and Leads that other EVM chains were not checked (R9: no scope widening). Keyless Blockscout instances for named chains, where they exist: `eth.blockscout.com`, `base.blockscout.com`, `polygon.blockscout.com`, `arbitrum.blockscout.com`, `optimism.blockscout.com`, `gnosis.blockscout.com` (verify availability). BNB Smart Chain has no keyless API in this family: use the explorer web page via G3 or an Etherscan-family API key from authorisation C; otherwise DEFERRED.
 - Monero: record the address format validity and the statement that public ledgers do not expose balances or transactions for XMR addresses; proceed only with S6/S7 (sanctions/abuse).
 - A library-verified invalid checksum ends the run as `NOT-INVESTIGABLE` (core §3.1) with a short pack documenting the result.
@@ -40,9 +40,9 @@ Validation (do in code if CAP-CODE):
 |---|---|---|
 | S1 | Validate; detect chain; checksum; EVM chain selection; print the explorer list | — |
 | S2 | Address summary from **two** independent explorers: balance, total received/sent, tx count, first/last activity (UTC, block height); record units (satoshi/wei/sun…) and the converted value; note any disagreement | B |
-| S3 | Transaction export: all transactions, or the most recent 500 plus the earliest 100 if more (record the cap; explorers paginate newest-first, so the earliest block is fetched explicitly — e.g. blockchain.info `rawaddr/<a>?limit=100&offset=<n_tx-100>`, or mempool.space `/address/<a>/txs/chain/<last txid>` paging to the end); save raw JSON pages; build a normalised CSV: txid, block, UTC, direction, value (native unit + converted), counterparty address(es), fee; token transfers (EVM) in a separate table | B |
-| S4 | Direct counterparties (one hop, derived): top 20 by value in and out, with counts and date spans; mark exchange/service labels only where an explorer shows one (EV ref) | — (derived) |
-| S5 | Public labels: explorer tag/name fields for the target and for the top counterparties; captured as shown; **"third-party label, unverified"** | A / B |
+| S3 | Transaction export: all transactions within the approved request/time budget, else a sample of the newest 500 plus earliest 100 that the provider can retrieve within budget. Save raw pages, cursor/offset, deduplicated transaction IDs, selected block intervals, omitted count where known and completeness. Do not page through an unbounded history just to obtain the oldest rows. For UTXO chains preserve every input outpoint/address/value and output index/address/value plus the target-address delta; for account chains preserve explicit from/to/value/status. Token events and internal traces are separate coverage categories | B |
+| S4 | Chain-specific analysis: UTXO input/output co-occurrence tables and target delta only; no allocation of an input's funds to a particular output, no inferred change address and no per-counterparty flow ranking. Account-chain explicit-transfer totals may be ranked only over the captured coverage, with failures excluded and self-transfers shown separately. Every capped result is headed `SAMPLED — not full-history totals` | — (derived) |
+| S5 | Public labels: explorer tag/name fields for the target and observed addresses selected within the intake cap; captured as shown with the selection basis. A label does not convert a UTXO co-occurrence into a directed transfer; **"third-party label, unverified"** | A / B |
 | S6 | Sanctions screening: download the OFAC SDN (CSV and XML), UN and UK list files (B) and search them for the exact address string (and, for EVM, its lower-case form); OFAC website search via G3 as a cross-check where available; capture every file and result page with list version/date | B / A |
 | S7 | Abuse reports: Chainabuse page captured (G3, or B if fetchable); report count, categories, dates as shown; otherwise SKIPPED | A / B |
 | S8 | Optional valuation: only if intake field 17 asked for it; capture a public price page for the stated date/time (A via G3, else B if a public price API is reachable, else SKIPPED); compute and show the formula | A / B |
@@ -52,8 +52,9 @@ Validation (do in code if CAP-CODE):
 
 - Save every API response page verbatim (`EV-nnn_<explorer>_<endpoint>_<page>.json`) with headers; the CSV is a derived item citing them.
 - Two-source rule for the summary: if explorers disagree beyond rounding, record both and do not pick one.
-- Units: always record the raw integer unit (satoshi, wei, sun, lamports, drops) alongside the decimal value and the divisor used.
+- Units: keep raw amounts as integers or integer strings and convert using exact decimal arithmetic with the captured divisor; never binary floating point. For tokens record chain ID, contract/mint, raw integer amount and decimals as separate captured values; names/symbols are untrusted labels.
 - Time: block timestamps are miner/validator-set and in UTC; state the source (explorer vs node) for each.
+- Anchor every dataset to chain/network ID, block height/hash and capture UTC. Record confirmed/finalized/pending status and the adapter's finality rule. A later reorg is a new observation; retain the prior block anchor and record the difference. EVM coverage must separately state native transactions, failed transactions, receipt logs/token events and internal traces; unavailable categories are `NOT CHECKED`, not zero. Failed transaction value is not a successful transfer; fees may still be charged. Do not infer a self-transfer's gross amount is economic outflow.
 - Never query the address on services that require an account; never submit the address to a form that creates a public record (e.g. a public "report" form); never interact with any contract or send any transaction.
 - Labels and tags are attributions by explorer operators or their communities; capture them, cite them, do not adopt them as facts.
 - No clustering: do not apply common-input-ownership, change-address or any heuristic to assert that other addresses belong to the same owner. Clustering with a blockchain-analytics platform, if the agency has one, is a Lead.
@@ -65,7 +66,7 @@ Validation (do in code if CAP-CODE):
 | Explorer API rate-limited (429) | Pause; switch to the second explorer; reduce page size |
 | Explorer returns different tx counts | Record both; export from both if feasible; note pagination differences (e.g. unconfirmed txs) |
 | Address has more transactions than the S3 cap (600) | Apply the cap, record it; a dedicated later run is a Lead |
-| Checksum library not installable | Record "checksum not verified"; continue |
+| Supported chain validator unavailable | Record validation NOT CHECKED and required coverage INCOMPLETE; summaries may be collected if approved, but no validated-address verdict is claimed |
 | OFAC website blocks automation | The downloadable list files (level B) are the record; the website cross-check is SKIPPED |
 | EVM address shows token spam/airdrops | Keep them in the token table; flag "unsolicited transfers possible" in cautions |
 | Chainabuse unavailable | SKIPPED (optional step) |
@@ -74,8 +75,8 @@ Validation (do in code if CAP-CODE):
 
 1. **Address identity** — chain(s), format, checksum validity, EVM chain presence table.
 2. **Summary** — per explorer; agreement/disagreement stated.
-3. **Activity timeline** — first/last activity, tx count, total in/out; monthly activity counts (derived table).
-4. **Direct counterparties** — top-20 tables with any explorer labels (cited).
+3. **Activity timeline and coverage** — provider summary versus export-derived values, captured block intervals, page/cursor count, omitted data, chain/block anchors and category completeness; all export counts and totals explicitly complete or sampled.
+4. **Transaction observations** — UTXO inputs/outputs and target delta, or supported account-chain explicit transfers; no unique fund-flow claim from co-occurrence. Eligible sampled rankings state their denominator and sampled basis.
 5. **Public labels** — for the target address, as shown.
 6. **Sanctions screening** — exact-match result per list, with capture refs; "no match" is recorded as such with the list version/date.
 7. **Abuse reports** — as shown, labelled public submissions.
@@ -84,7 +85,7 @@ Validation (do in code if CAP-CODE):
 
 ### 9.7 XLSX sheets
 
-`Address_Summary` (field, explorer 1, explorer 2, unit, EV) · `Transactions` (txid, block, UTC, direction, value raw, value decimal, counterparty, fee, EV page) · `Token_Transfers` (EVM: tx, token contract, symbol, from, to, value, EV) · `Counterparties` (address, direction, total, count, first, last, label shown, label EV) · `Labels_Attribution` (address, label, source, EV) · `Sanctions_Screening` (list, version/date, match Y/N, EV) · `Abuse_Reports` (count, categories, latest date, EV).
+`Address_Summary` (chain/network, block hash/height, field, explorer 1, explorer 2, unit, EV) · `Transactions` (txid, block, UTC, status, target delta raw, fee raw, coverage, EV page) · `UTXO_Inputs_Outputs` (txid, input/output, outpoint/index, address, value raw, EV) · `Token_Transfers` (chain, tx, contract/mint, symbol shown, decimals, from, to, raw amount, EV) · `Explicit_Transfers` (chain, address, direction, captured total, count, coverage, label EV) · `Coverage` (category, first/last block, pages, cursor, omitted count, completeness) · `Labels_Attribution` (address, label, source, EV) · `Sanctions_Screening` (list, version/date, match Y/N, EV) · `Abuse_Reports` (count, categories, latest date, EV).
 
 ### 9.8 Interpretation cautions
 
@@ -96,11 +97,13 @@ Validation (do in code if CAP-CODE):
 
 ### 9.9 Leads policy
 
-Top counterparties (separate L1-CRY runs); labelled services for lawful requests (exchange compliance contacts); analytics-platform clustering; related addresses named in the case; off-chain mentions of the address (L1-WEB search).
+Observed transfer counterparties or UTXO co-occurring addresses (separate L1-CRY runs, preserving that distinction); labelled services for agency-verified request routes; analytics-platform clustering; related addresses named in the case; off-chain mentions (L1-WEB search).
 
 ### 9.10 Self-test specification
 
-Target: `1A1zP1eP5QGefi2DMPTfTL5SLmv7DivfNa` (the Bitcoin genesis-block coinbase address). Assertions: chain `BTC`, format P2PKH, base58check valid; mempool.space summary HTTP 200 with `chain_stats.spent_txo_count` = `0` and `chain_stats.funded_txo_count` ≥ `80000` and `chain_stats.tx_count` ≥ `60000` (values only grow); second explorer (blockchain.info `rawaddr`) HTTP 200 with `n_tx` ≥ `60000`; the earliest-100 export (fetched by offset) has its first transaction in block `0` with timestamp `2009-01-03T18:15:05Z`; OFAC SDN list file downloaded (HTTP 200) and the address string not found in it → `NO MATCH`; caps: S3 = most recent 100 plus earliest 100; `skip: S5, S7, S8`.
+The versioned `selftest/L1-CRY.selftest.json` is the machine-readable assertion contract. Missing required fixtures, adapters or expected results yield INCOMPLETE, never PASS. Offline regression results and optional live-provider smoke results are reported separately.
+
+The required regression test is offline: controlled multi-input/multi-output, change, self-transfer, sampled-history, failed-EVM, token-decimal and changed-block-anchor fixtures. Assert preserved input/output values and target delta without invented input-to-output allocation; sampled totals must carry coverage; failed value is not a transfer; Bech32 and Bech32m valid/invalid vectors are separate. A missing adapter or fixture yields INCOMPLETE, never PASS. Live explorer checks are optional smoke tests with small request budgets and no full-history assertion. The genesis subsidy is a special unspendable coinbase output; later payments to its corresponding address are not all made unspendable by that special case.
 
 ### 9.11 Lawful-request mapping
 

@@ -1,8 +1,13 @@
 {
-  "schema": "l1-selftest/1.1",
+  "schema": "l1-selftest/1.3",
   "agent": "L1-ONI",
-  "agent_version": "1.2",
-  "verified_on": "2026-10-28",
+  "agent_version": "1.3.0",
+  "historical_baseline_date": "2026-10-28",
+  "validation": {
+    "live_provider_verified": false,
+    "host_matrix": [],
+    "scope": "Compares supplied observations; does not generate them or certify a host."
+  },
   "target": "https://duckduckgogg42xjoc72x3sjasowoarfbgcmvfimaftt6twagswzczad.onion/",
   "skip_steps": [
     "S2",
@@ -23,6 +28,8 @@
       "id": "ONI-01",
       "step": "S1",
       "description": "address format valid (56 base32 + .onion)",
+      "path": "/values/S1/address_format_valid_56_base32_onion",
+      "required": true,
       "check": "equals",
       "expect": true
     },
@@ -30,6 +37,8 @@
       "id": "ONI-02",
       "step": "S1",
       "description": "version byte",
+      "path": "/values/S1/version_byte",
+      "required": true,
       "check": "equals",
       "expect": 3
     },
@@ -37,6 +46,8 @@
       "id": "ONI-03",
       "step": "S1",
       "description": "checksum valid (if computed)",
+      "path": "/values/S1/checksum_valid_if_computed",
+      "required": true,
       "check": "in",
       "expect": [
         true,
@@ -47,6 +58,8 @@
       "id": "ONI-04",
       "step": "S5",
       "description": "clearnet search result page captured",
+      "path": "/values/S5/clearnet_search_result_page_captured",
+      "required": true,
       "check": "gte",
       "expect": 1
     },
@@ -54,6 +67,8 @@
       "id": "ONI-05",
       "step": "unit",
       "description": "validation routine applied to the v2 address expyuzz4wqqyqhjn.onion (code only)",
+      "path": "/values/unit/validation_routine_applied_to_the_v2_address_expyuzz4wqqyqhjn_onion_code_only",
+      "required": true,
       "check": "equals",
       "expect": "NOT-INVESTIGABLE"
     }

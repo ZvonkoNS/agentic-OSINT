@@ -1,0 +1,71 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:agentic-osint:schema:addendum:1.3",
+  "title": "agentic-OSINT addendum 1.3",
+  "type": "object",
+  "properties": {
+    "schema": {
+      "const": "agentic-osint/addendum/1.3"
+    },
+    "pack_id": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "sequence": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "created_utc": {
+      "type": "string",
+      "format": "date-time",
+      "pattern": "(Z|\\+00:00)$"
+    },
+    "actor": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 200,
+      "pattern": "\\S"
+    },
+    "actor_authentication": {
+      "const": "operator-asserted"
+    },
+    "note": {
+      "type": "string"
+    },
+    "original_name": {
+      "type": "string",
+      "minLength": 1
+    },
+    "sha256": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
+    },
+    "size": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "previous_hash": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
+    },
+    "hash": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
+    }
+  },
+  "required": [
+    "schema",
+    "pack_id",
+    "sequence",
+    "created_utc",
+    "actor",
+    "actor_authentication",
+    "note",
+    "original_name",
+    "sha256",
+    "size",
+    "previous_hash",
+    "hash"
+  ],
+  "additionalProperties": false
+}

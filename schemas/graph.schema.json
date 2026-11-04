@@ -1,0 +1,262 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:agentic-osint:schema:graph:1.3",
+  "title": "agentic-OSINT graph 1.3",
+  "type": "object",
+  "properties": {
+    "schema": {
+      "const": "agentic-osint/graph/1.3"
+    },
+    "nodes": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "minLength": 1
+          },
+          "raw": {
+            "type": "string",
+            "minLength": 1
+          },
+          "type": {
+            "type": "string",
+            "minLength": 1
+          },
+          "namespace": {
+            "type": "string"
+          },
+          "comparison_key": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "minItems": 3,
+            "maxItems": 3
+          },
+          "raw_values": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "minLength": 1
+            },
+            "minItems": 1
+          },
+          "observations": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "pack_id": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "ev": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "status": {
+                  "enum": [
+                    "artifact_bytes_checked",
+                    "producer_reported"
+                  ]
+                },
+                "reason": {
+                  "type": "string"
+                },
+                "observation_index": {
+                  "type": "integer",
+                  "minimum": 0
+                }
+              },
+              "required": [
+                "pack_id",
+                "ev",
+                "status",
+                "reason",
+                "observation_index"
+              ],
+              "additionalProperties": false
+            },
+            "minItems": 1
+          }
+        },
+        "required": [
+          "id",
+          "raw",
+          "type",
+          "namespace",
+          "comparison_key",
+          "raw_values",
+          "observations"
+        ],
+        "additionalProperties": false
+      },
+      "minItems": 0
+    },
+    "edges": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "enum": [
+              "captured_cooccurrence",
+              "producer_reported",
+              "lead_relation"
+            ]
+          },
+          "source": {
+            "type": "string",
+            "minLength": 1
+          },
+          "target": {
+            "type": "string",
+            "minLength": 1
+          },
+          "pack_id": {
+            "type": "string",
+            "minLength": 1
+          },
+          "ev": {
+            "type": "string",
+            "minLength": 1
+          },
+          "lead_id": {
+            "type": "string",
+            "minLength": 1
+          },
+          "verification": {
+            "enum": [
+              "artifact_bytes_checked",
+              "not_source_verified",
+              "unverified_lead"
+            ]
+          }
+        },
+        "required": [
+          "type",
+          "source",
+          "target",
+          "pack_id",
+          "verification"
+        ],
+        "additionalProperties": false
+      },
+      "minItems": 0
+    },
+    "issues": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "pack_id": {
+            "type": "string",
+            "minLength": 1
+          },
+          "ev": {
+            "type": "string",
+            "minLength": 1
+          },
+          "observation_index": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "lead_id": {
+            "type": "string",
+            "minLength": 1
+          },
+          "reason": {
+            "type": "string",
+            "minLength": 1
+          },
+          "status": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "required": [
+          "pack_id",
+          "reason"
+        ],
+        "additionalProperties": false
+      },
+      "minItems": 0
+    },
+    "excluded_packs": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "pack_id": {
+            "type": "string",
+            "minLength": 1
+          },
+          "ev": {
+            "type": "string",
+            "minLength": 1
+          },
+          "reason": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "required": [
+          "pack_id",
+          "ev",
+          "reason"
+        ],
+        "additionalProperties": false
+      },
+      "minItems": 0
+    },
+    "limits": {
+      "type": "object",
+      "properties": {
+        "artifact_bytes": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "total_artifact_bytes": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "observations_and_leads": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "edges": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "packs": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "meaning": {
+          "type": "string",
+          "minLength": 1
+        }
+      },
+      "required": [
+        "artifact_bytes",
+        "total_artifact_bytes",
+        "observations_and_leads",
+        "edges",
+        "packs",
+        "meaning"
+      ],
+      "additionalProperties": false
+    }
+  },
+  "required": [
+    "schema",
+    "nodes",
+    "edges",
+    "issues",
+    "excluded_packs",
+    "limits"
+  ],
+  "additionalProperties": false
+}

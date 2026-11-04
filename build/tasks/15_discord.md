@@ -14,7 +14,7 @@ INPUT_TYPE: Discord invite link (discord.gg/<code>, discord.com/invite/<code>) o
 
 Validation:
 - Invite code: 2–32 characters `[A-Za-z0-9-]`; accept with or without the `discord.gg` / `discord.com/invite` prefix; record as given.
-- Numeric guild ID: 17–20 digits (a Snowflake). Decode the Snowflake's creation timestamp in code (`(id >> 22) + 1420070400000` ms since epoch → UTC) and record it as a derived fact ("ID created at", which is the server's creation time for guild IDs).
+- Numeric input: parse as an unsigned integer within the Discord ID range, preserve the raw string, and label it `unverified candidate guild ID` until a captured Discord object confirms its ID and type. The formula `(id >> 22) + 1420070400000` yields a computed millisecond timestamp, not proof that arbitrary numeric input identifies a real object. Decode only confirmed non-anonymized guild/channel/inviter fields, naming the exact source field; retain `.mmmZ` precision.
 - A user ID or message link (`discord.com/channels/<guild>/<channel>/<message>`) is not an invite: record the guild ID from it as the target if present; message content is `not accessible without authentication`.
 
 ### 9.2 Sources
@@ -22,7 +22,7 @@ Validation:
 | Source | Use | Level | Notes |
 |---|---|---|---|
 | `https://discord.com/api/v10/invites/<code>?with_counts=true&with_expiration=true` | Invite resolution: guild name/id/description/icon/banner/features, channel name/id/type, approximate_member_count, approximate_presence_count, expires_at, inviter (where included) | B | Public, no token |
-| `https://discord.com/api/guilds/<guild id>/widget.json` | Public widget: name, instant_invite, channels, members shown online, presence_count | B | Only if the server owner enabled the widget; 403 otherwise (a fact) |
+| `https://discord.com/api/guilds/<guild id>/widget.json` | Public widget: name, instant_invite, channels, anonymized display records, presence_count | B | Parse the captured Discord error JSON as well as HTTP status; generic 403 is not proof of disabled settings |
 | `https://discord.gg/<code>` landing page (logged-out) | Rendered preview | B (A via G3) | Shows name and counts; nothing more without login |
 | Icon/banner CDN URLs from the invite JSON (`cdn.discordapp.com/icons/<guild id>/<hash>.png`) | Images | B | Hash of the image file |
 | Search engines: `"discord.gg/<code>"` and `"<guild id>"` | Where the invite is advertised | C → A/B | Capture cited pages |
@@ -32,9 +32,9 @@ Validation:
 
 | Step | Purpose | Level |
 |---|---|---|
-| S1 | Parse; classify (invite / guild ID / message link); Snowflake timestamps for every ID present (computed facts, formula shown); print the source list | — |
+| S1 | Parse and classify input; record candidate object type; print the source list. Defer Snowflake object-time interpretation until a captured Discord object confirms the ID/type; never decode anonymized widget-member identifiers | — |
 | S2 | Invite resolution JSON captured with headers; table of fields; expiry recorded if present; inviter fields recorded exactly as returned (username, global name, ID — the ID's Snowflake timestamp is derived) | B |
-| S3 | Public widget JSON (if enabled): channels list, members shown, counts; 403 recorded as "widget disabled by server" | B |
+| S3 | Public widget JSON: preserve channels, anonymized display records and counts exactly. A captured Discord error code `50004` means widget disabled; other errors remain their actual documented code or `HTTP 403 — cause not established`, never a guessed setting | B |
 | S4 | Landing page capture (B; A via G3 where available): what an anonymous visitor sees | B / A |
 | S5 | Images: server icon and banner files captured and hashed | B |
 | S6 | Where it is advertised: search-engine results for the invite code and guild ID; up to 10 pages captured (these pages often show the server's purpose as its promoters describe it — captured as third-party statements) | C → A/B |
@@ -43,11 +43,11 @@ Validation:
 
 ### 9.4 Task-specific capture rules
 
-- No joining, no account, no token, no client. An invite JSON request does not join or notify anyone; the landing page is a public page. Anything requiring more is `not accessible without authentication` and a lawful-request lead.
+- No joining, no account, no token, no client. Public GETs do not join a guild, but are observable to service operators; do not promise invisibility or absence of logging. Anything requiring authentication remains outside this run.
 - Counts are approximate by Discord's own labelling (`approximate_member_count`); record the field name with the value.
 - Inviter data, when Discord includes it, is a Discord account record as returned at that time; it is recorded verbatim and the account is a Lead, not a person.
-- Widget member lists show display names of members online at that moment with the widget enabled; they are recorded as a captured list, never as a membership roster.
-- Snowflake-derived timestamps are computed facts (formula shown) about when an ID was issued.
+- Widget member IDs, discriminator and avatar fields may be anonymized. Preserve them as widget display records only, with no stable-account attribution, Snowflake decoding, cross-pack identity merge or membership-roster claim.
+- A Snowflake-derived timestamp is a computation from a confirmed non-anonymized object ID, with source field and formula; it is not an independently measured creation time or activity timestamp. Unconfirmed numeric candidates remain unverified.
 
 ### 9.5 Task-specific self-healing cases
 
@@ -55,14 +55,14 @@ Validation:
 |---|---|
 | Invite returns 404 "Unknown Invite" | Record it with UTC: the invite is invalid, expired or revoked; capture the JSON error as EV; try the landing page; Lead: lawful request with the code |
 | Invite returns 429 | Pause per `retry_after`; one retry |
-| Widget 403 | Record "widget disabled" (a fact, not an error); continue |
+| Widget HTTP 403 | Preserve HTTP headers/body. Report disabled only when captured Discord JSON has documented error code `50004`; otherwise report the returned code/message or cause unknown |
 | Invite requires verification/phone (`features` or landing page says so) | Record the requirement; nothing further is possible without an account |
 | Guild ID given but no invite known | S2 impossible; S3 (widget) and S6 (mentions) only; say so in Findings |
 | Host assistant declines (e.g. server content) | `DECLINED-BY-HOST`; JSON facts reported only |
 
 ### 9.6 Findings structure
 
-1. **Invite / server identity** — code, guild ID, name, description, features, Snowflake creation time, vanity URL (EV refs).
+1. **Invite / server identity** — code, confirmed guild ID or unverified candidate, name, description, features, computed ID timestamp with millisecond precision/source field, vanity URL (EV refs).
 2. **Counts and target channel** — approximate member/presence counts, channel name/ID/type, expiry.
 3. **Inviter record** — as returned (or "not included").
 4. **Public widget** — enabled/disabled; channels and members shown if enabled.
@@ -79,8 +79,9 @@ Validation:
 
 - A server name and description are set by its owner and can change at any time; the invite code can be revoked.
 - Approximate counts are Discord's estimates at the moment of the request.
-- Snowflake timestamps show when Discord issued the ID, not when any activity happened.
+- For confirmed non-anonymized objects, the timestamp encoded in the ID is a derived provider-format value; it is not an independent clock measurement or activity time. Candidate and widget IDs establish no creation fact.
 - Nothing here identifies the server owner, moderators or members; that needs a lawful request to Discord.
+- Error-code interpretation uses Discord's [official JSON error-code documentation](https://github.com/discord/discord-api-docs/blob/main/developers/topics/opcodes-and-status-codes.mdx); preserve the actual captured error body and provider documentation version/date used.
 
 ### 9.9 Leads policy
 
@@ -88,7 +89,9 @@ Inviter account and any handles in the description (lawful request / L1-USR); li
 
 ### 9.10 Self-test specification
 
-Target: `https://discord.gg/discord-developers` (Discord's official developer server). Assertions: invite JSON HTTP 200; `guild.name` = `Discord Developers`; `guild.id` = `613425648685547541`; Snowflake-derived creation time of that ID = `2019-08-20T17:34:31Z`; `approximate_member_count` ≥ 100000 (drifts upward); S3 widget returns 200 or 403 (either is a valid result); S6 `skip`.
+The versioned `selftest/L1-DSC.selftest.json` is the machine-readable assertion contract. Missing required fixtures, adapters or expected results yield INCOMPLETE, never PASS. Offline regression results and optional live-provider smoke results are reported separately.
+
+Required offline fixtures include a confirmed guild ID `613425648685547541` whose computed time is exactly `2019-08-20T17:34:31.544Z`, arbitrary numeric input, anonymized widget member ID `0`, Discord error code `50004`, and a generic/non-Discord HTTP 403. Assert that only the confirmed non-anonymized ID receives an object-time interpretation and only `50004` receives `widget disabled`. Optional live invite smoke tests report current captured values and availability separately; a changed guild name/count does not excuse failures in these offline rules.
 
 ### 9.11 Lawful-request mapping
 

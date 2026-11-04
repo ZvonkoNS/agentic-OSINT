@@ -10,7 +10,7 @@ INPUT_TYPE: .onion URL (v3 address: 56 base32 characters followed by .onion, opt
 **In scope:** address validation; the one page given (and its directly linked resources on the same onion service, up to a small cap); its HTTP response headers as seen in Tor Browser; a clearnet-side check of where the address is mentioned (search engines, public onion directories); public archive status.
 **Out of scope (→ Leads or prohibited):** logging in, registering, purchasing, messaging, posting, or interacting with any marketplace/forum function (R2); crawling beyond the given page and its direct links; de-anonymisation of the service or its users; Tor2web or any clearnet proxy to an onion address (third-party disclosure and no integrity — never used); running Tor inside the AI sandbox.
 
-**Module requirements:** this module cannot reach its target from the sandbox by design, so the operating mode is **ASSISTED** at best: the Investigator performs the captures in Tor Browser, step by step, following the agent's instructions; the agent validates, documents, hashes, checks consistency and produces the pack. Print this at Phase 0. FULL mode is not available for this module. CAP-UPLOAD is required (the Investigator attaches the captures).
+**Module requirements:** this module cannot reach its target from the sandbox by design. Its narrow exception to the suite's Tor prohibition is **Investigator-operated Tor Browser for the approved onion target only**; the AI never runs Tor, uses a Tor proxy or controls the Investigator's Tor Browser. FULL mode is unavailable. With CAP-UPLOAD, ASSISTED mode can inspect attached, hash-matched copies. Without upload, GUIDED inventory-only mode records Investigator assertions and hashes but cannot inspect content, verify bytes or write content findings; those checks remain INCOMPLETE.
 
 **Intake additions (printed with the form):** field **16** = "Tor Browser version installed (Help → About Tor Browser)"; field **17** = "Security Level set in Tor Browser (Standard / Safer / Safest) — Safer or Safest recommended for capture"; field **18** = "Does your agency permit visiting onion services from this workstation (dedicated/isolated machine recommended)? Y/N". Authorisation **D: none**.
 
@@ -44,13 +44,13 @@ Validation:
 
 ### 9.4 Task-specific capture rules — Tor Browser procedure given to the Investigator
 
-1. Use a dedicated or isolated workstation if the agency has one. Tor Browser security level **Safer** (or **Safest** if the page works without scripts). Do not add extensions. Do not log in to anything.
+1. Use an agency-approved isolated capture environment. Record Tor Browser version and chosen security level. Confirm the capture controls on a harmless local/test page before a case: this repository has not certified a Tor Browser version or shortcut. If no supported capture path is demonstrated, stop that capture as INCOMPLETE. Do not add extensions or log in.
 2. Note the system clock (UTC) before loading. Load the exact URL. Wait for full render. Do not click anything except to scroll.
-3. Screenshot: `Ctrl+Shift+S` → "Save full page" (Tor Browser is Firefox-based). Name `EV-<nnn>_onion_screenshot.png`.
-4. Save page: `Ctrl+S` → "Web Page, complete". Name `EV-<nnn>_onion_page.html` (+ its `_files` folder, which is zipped as one file for hashing).
+3. Screenshot: use the capture command actually available and tested in that Tor Browser version, or the agency's approved screen-capture tool. Do not assume Firefox's `Ctrl+Shift+S` feature is enabled. Record viewport/full-page extent and tool/version. Name `EV-<nnn>_onion_screenshot.png`.
+4. Save page with the tested Save Page As control. Keep the HTML and its relative `_files` resource directory together; place both inside one archive without changing either. Hash the archive and individual members and record their relative paths. Retain the originals. Inspect saved source as inert text; reconstruction for review uses an isolated offline viewer with scripts and external networking disabled, never an ordinary online browser.
 5. Print to PDF with URL and date in the header/footer. Name `EV-<nnn>_onion_print.pdf`.
 6. Headers: `F12` → Network → reload → click the document request → right-click → "Copy Response Headers" → paste into `EV-<nnn>_onion_headers.txt`.
-7. Hash every artefact — the page HTML, the zipped `_files` folder, the screenshot, the PDF and the headers text — with the §5.6 one-file command and paste the lines to the agent together with the UTC time of capture. Then attach the files if the host allows; otherwise the hashes alone go into the inventory with `files held by Investigator`.
+7. Hash every artifact locally at acquisition, record actual saved paths, byte sizes, capture-start/end UTC and tool versions. Attach copies only if agency policy and the host permit; the agent recomputes their hashes and retains expected/observed values. Without attached bytes, label records `INVESTIGATOR-ASSERTED — BYTES NOT VERIFIED`, keep content findings absent and verification INCOMPLETE.
 8. Close the tab. Record Tor Browser version and security level in the chat (fields 16–17 already hold them).
 
 Other rules: the agent never asks the Investigator to interact beyond scrolling; no form, button, search box or link is used except to open the listed direct links; a login wall or CAPTCHA on the onion service ends the capture of that item (`not accessible without authentication`); crypto addresses, PGP fingerprints and handles seen on the page are transcribed as Leads, not looked up here (R9).
@@ -59,7 +59,7 @@ Other rules: the agent never asks the Investigator to interact beyond scrolling;
 
 | Symptom | Remedy to propose at G4 |
 |---|---|
-| Service unreachable in Tor Browser ("Onionsite not found" / timeout) | Retry once after a new Tor circuit (Tor Browser menu → New Tor circuit for this site); if still unreachable, record `unreachable at <UTC>` with the error text as shown; try again later as a post-run step |
+| Service unreachable in Tor Browser ("Onionsite not found" / timeout) | One ordinary retry within the agency's approved availability procedure and budget. A circuit change is Investigator-only and permitted only for ordinary connectivity, never to evade a block, rate limit, authentication or protection. If still unreachable, preserve the error and mark capture INCOMPLETE |
 | Page requires JavaScript at Safest level | Investigator may switch to Safer for this item; the level change is recorded in the evidence record |
 | Investigator's hash does not match the attached file | SH event; the Investigator re-hashes; if still different, the attached copy is quarantined and the locally held file with the Investigator's hash is the item of record |
 | Page content changes between screenshot and HTML save | Keep both; note the volatility |
@@ -91,7 +91,9 @@ Clearnet links and mirrors (L1-WEB/L1-DOM); crypto addresses (L1-CRY); handles (
 
 ### 9.10 Self-test specification
 
-Target: `https://duckduckgogg42xjoc72x3sjasowoarfbgcmvfimaftt6twagswzczad.onion/` (DuckDuckGo's published onion service). Assertions: address format valid; version byte = 3; checksum valid (if computed); the Investigator-side capture is **optional** in self-test (`skip: S2, S3, S4, S6` unless the Investigator chooses to perform S2/S3, in which case S4/S6 run too); intake field 18 is set to `Y` for the self-test; S5 clearnet search returns ≥ 1 result page captured; validation of `http://expyuzz4wqqyqhjn.onion/` (a v2 address) returns `NOT-INVESTIGABLE`.
+The versioned `selftest/L1-ONI.selftest.json` is the machine-readable assertion contract. Missing required fixtures, adapters or expected results yield INCOMPLETE, never PASS. Offline regression results and optional live-provider smoke results are reported separately.
+
+Required offline checks: known valid/invalid v3 address vectors, a rejected v2 address, an inert saved HTML/resource bundle, matching/mismatching attached-byte hashes and inventory-only input. The no-upload path must produce no content findings and an INCOMPLETE byte/content verdict. An optional Investigator-side harmless service capture may test the local procedure, but only the observed browser/tool/version is recorded; skipping it is `local capture NOT TESTED`, never certification that the Tor workflow passed. Do not set agency permission to Y automatically.
 
 ### 9.11 Lawful-request mapping
 

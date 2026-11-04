@@ -1,5 +1,18 @@
 # Changelog
 
+## v1.3.0 — 2026-11-04
+
+- Add a local toolkit for supported evidence operations; distinguish executable checks from supervised prompt procedures.
+- Calculate hashes over written bytes, declare text/binary attributes and add cross-platform release checks.
+- Separate byte integrity, workflow, required coverage and support; preserve discrepancies and post-seal addenda.
+- Add structured claim/checkpoint/self-test contracts; missing required comparisons remain incomplete.
+- Revise every collector and both standalone procedures for bounded scope, provenance, uncertainty and provider-specific limits.
+- Add direct agent links, a harmless local example and a compatibility matrix; remove unsupported guarantees.
+- Remove paid-product promotion from mandatory questions and formal evidence instructions; advanced exports remain optional.
+- Add an MIT license, contribution guidance and security reporting policy.
+
+Earlier entries describe behavior advertised at those releases. They are historical records, not validation claims for the current version. No cross-vendor model benchmark or legal/ISO certification is claimed.
+
 ## v1.2 — 2026-10-28
 - **Five new Level-1 agents:** 11 Telegram channel/profile, 12 onion service (Investigator-side Tor Browser, ASSISTED by design), 13 document/file metadata, 14 YouTube/online video, 15 Discord invite/server preview.
 - **Pack Verifier (file 00):** independent re-verification of hashes, citations, quotations, value provenance, gates, custody, timestamp proofs and exports; Verification Statement for sign-off.

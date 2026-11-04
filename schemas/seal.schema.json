@@ -1,0 +1,36 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:agentic-osint:schema:seal:1.3",
+  "title": "agentic-OSINT seal 1.3",
+  "type": "object",
+  "properties": {
+    "schema": {
+      "const": "agentic-osint/seal/1.3"
+    },
+    "pack_id": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "sealed_utc": {
+      "type": "string",
+      "format": "date-time",
+      "pattern": "(Z|\\+00:00)$"
+    },
+    "manifest_sha256": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
+    },
+    "anchor": {
+      "type": "string",
+      "minLength": 1
+    }
+  },
+  "required": [
+    "schema",
+    "pack_id",
+    "sealed_utc",
+    "manifest_sha256",
+    "anchor"
+  ],
+  "additionalProperties": false
+}

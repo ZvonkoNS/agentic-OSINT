@@ -1,8 +1,13 @@
 {
-  "schema": "l1-selftest/1.1",
+  "schema": "l1-selftest/1.3",
   "agent": "L1-IPA",
-  "agent_version": "1.2",
-  "verified_on": "2026-10-28",
+  "agent_version": "1.3.0",
+  "historical_baseline_date": "2026-10-28",
+  "validation": {
+    "live_provider_verified": false,
+    "host_matrix": [],
+    "scope": "Compares supplied observations; does not generate them or certify a host."
+  },
   "target": "1.1.1.1",
   "skip_steps": [
     "S8",
@@ -19,6 +24,8 @@
       "id": "IPA-01",
       "step": "S1",
       "description": "classification",
+      "path": "/values/S1/classification",
+      "required": true,
       "check": "equals",
       "expect": "public"
     },
@@ -26,6 +33,8 @@
       "id": "IPA-02",
       "step": "S2",
       "description": "RDAP name",
+      "path": "/values/S2/rdap_name",
+      "required": true,
       "check": "equals",
       "expect": "APNIC-LABS"
     },
@@ -33,6 +42,8 @@
       "id": "IPA-03",
       "step": "S2",
       "description": "RDAP range",
+      "path": "/values/S2/rdap_range",
+      "required": true,
       "check": "equals",
       "expect": "1.1.1.0-1.1.1.255"
     },
@@ -40,6 +51,8 @@
       "id": "IPA-04",
       "step": "S3",
       "description": "ASN",
+      "path": "/values/S3/asn",
+      "required": true,
       "check": "equals",
       "expect": 13335
     },
@@ -47,6 +60,8 @@
       "id": "IPA-05",
       "step": "S3",
       "description": "prefix",
+      "path": "/values/S3/prefix",
+      "required": true,
       "check": "equals",
       "expect": "1.1.1.0/24"
     },
@@ -54,6 +69,8 @@
       "id": "IPA-06",
       "step": "S3",
       "description": "routing history at incident timestamp shows ASN",
+      "path": "/values/S3/routing_history_at_incident_timestamp_shows_asn",
+      "required": true,
       "check": "equals",
       "expect": 13335
     },
@@ -61,6 +78,8 @@
       "id": "IPA-07",
       "step": "S4",
       "description": "PTR",
+      "path": "/values/S4/ptr",
+      "required": true,
       "check": "equals",
       "expect": "one.one.one.one"
     },
@@ -68,6 +87,8 @@
       "id": "IPA-08",
       "step": "S5",
       "description": "two geolocation providers responded",
+      "path": "/values/S5/two_geolocation_providers_responded",
+      "required": true,
       "check": "equals",
       "expect": true
     },
@@ -75,20 +96,26 @@
       "id": "IPA-09",
       "step": "S6",
       "description": "in Tor bulk exit list",
+      "path": "/values/S6/in_tor_bulk_exit_list",
+      "required": true,
       "check": "equals",
       "expect": false
     },
     {
       "id": "IPA-10",
       "step": "S6",
-      "description": "ExoneraTor page captured",
-      "check": "exists",
-      "expect": true
+      "description": "ExoneraTor resolution",
+      "path": "/values/S6/exonerator_resolution",
+      "required": true,
+      "check": "equals",
+      "expect": "date"
     },
     {
       "id": "IPA-11",
       "step": "S7",
       "description": "Shodan InternetDB hostnames contain",
+      "path": "/values/S7/shodan_internetdb_hostnames_contain",
+      "required": true,
       "check": "contains",
       "expect": "one.one.one.one",
       "may_drift": true
@@ -97,6 +124,8 @@
       "id": "IPA-12",
       "step": "unit",
       "description": "validation routine applied to 192.168.1.1 (code only, no network)",
+      "path": "/values/unit/validation_routine_applied_to_192_168_1_1_code_only_no_network",
+      "required": true,
       "check": "equals",
       "expect": "NOT-INVESTIGABLE"
     }

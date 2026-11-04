@@ -1,8 +1,13 @@
 {
-  "schema": "l1-selftest/1.1",
+  "schema": "l1-selftest/1.3",
   "agent": "L1-TGM",
-  "agent_version": "1.2",
-  "verified_on": "2026-10-28",
+  "agent_version": "1.3.0",
+  "historical_baseline_date": "2026-10-28",
+  "validation": {
+    "live_provider_verified": false,
+    "host_matrix": [],
+    "scope": "Compares supplied observations; does not generate them or certify a host."
+  },
   "target": "t.me/telegram",
   "skip_steps": [
     "S7"
@@ -18,6 +23,8 @@
       "id": "TGM-01",
       "step": "S2",
       "description": "info page HTTP status",
+      "path": "/values/S2/info_page_http_status",
+      "required": true,
       "check": "equals",
       "expect": 200
     },
@@ -25,6 +32,8 @@
       "id": "TGM-02",
       "step": "S2",
       "description": "title",
+      "path": "/values/S2/title",
+      "required": true,
       "check": "equals",
       "expect": "Telegram News"
     },
@@ -32,6 +41,8 @@
       "id": "TGM-03",
       "step": "S2",
       "description": "handle present",
+      "path": "/values/S2/handle_present",
+      "required": true,
       "check": "contains",
       "expect": "@telegram"
     },
@@ -39,6 +50,8 @@
       "id": "TGM-04",
       "step": "S2",
       "description": "subscriber count displayed",
+      "path": "/values/S2/subscriber_count_displayed",
+      "required": true,
       "check": "matches",
       "expect": "^\\d[\\d\\s,.]*\\s*subscribers$",
       "may_drift": true
@@ -47,6 +60,8 @@
       "id": "TGM-05",
       "step": "S3",
       "description": "preview page HTTP status",
+      "path": "/values/S3/preview_page_http_status",
+      "required": true,
       "check": "equals",
       "expect": 200
     },
@@ -54,6 +69,8 @@
       "id": "TGM-06",
       "step": "S3",
       "description": "posts on preview page 1",
+      "path": "/values/S3/posts_on_preview_page_1",
+      "required": true,
       "check": "gte",
       "expect": 10
     },
@@ -61,6 +78,8 @@
       "id": "TGM-07",
       "step": "S3",
       "description": "every captured post has ISO datetime",
+      "path": "/values/S3/every_captured_post_has_iso_datetime",
+      "required": true,
       "check": "equals",
       "expect": true
     },
@@ -68,6 +87,8 @@
       "id": "TGM-08",
       "step": "S4",
       "description": "media files captured",
+      "path": "/values/S4/media_files_captured",
+      "required": true,
       "check": "gte",
       "expect": 1
     }

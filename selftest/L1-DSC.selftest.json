@@ -1,8 +1,13 @@
 {
-  "schema": "l1-selftest/1.1",
+  "schema": "l1-selftest/1.3",
   "agent": "L1-DSC",
-  "agent_version": "1.2",
-  "verified_on": "2026-10-28",
+  "agent_version": "1.3.0",
+  "historical_baseline_date": "2026-10-28",
+  "validation": {
+    "live_provider_verified": false,
+    "host_matrix": [],
+    "scope": "Compares supplied observations; does not generate them or certify a host."
+  },
   "target": "https://discord.gg/discord-developers",
   "skip_steps": [
     "S6"
@@ -16,6 +21,8 @@
       "id": "DSC-01",
       "step": "S2",
       "description": "invite JSON HTTP status",
+      "path": "/values/S2/invite_json_http_status",
+      "required": true,
       "check": "equals",
       "expect": 200
     },
@@ -23,6 +30,8 @@
       "id": "DSC-02",
       "step": "S2",
       "description": "guild.name",
+      "path": "/values/S2/guild_name",
+      "required": true,
       "check": "equals",
       "expect": "Discord Developers"
     },
@@ -30,20 +39,26 @@
       "id": "DSC-03",
       "step": "S2",
       "description": "guild.id",
+      "path": "/values/S2/guild_id",
+      "required": true,
       "check": "equals",
       "expect": "613425648685547541"
     },
     {
       "id": "DSC-04",
       "step": "S1",
-      "description": "Snowflake creation time of guild id",
+      "description": "Snowflake creation time of confirmed guild id milliseconds",
+      "path": "/values/S1/snowflake_creation_time_of_confirmed_guild_id_milliseconds",
+      "required": true,
       "check": "equals",
-      "expect": "2019-08-20T17:34:31Z"
+      "expect": "2019-08-20T17:34:31.544Z"
     },
     {
       "id": "DSC-05",
       "step": "S2",
       "description": "approximate_member_count",
+      "path": "/values/S2/approximate_member_count",
+      "required": true,
       "check": "gte",
       "expect": 100000,
       "may_drift": true
@@ -52,6 +67,8 @@
       "id": "DSC-06",
       "step": "S3",
       "description": "widget HTTP status",
+      "path": "/values/S3/widget_http_status",
+      "required": true,
       "check": "in",
       "expect": [
         200,
@@ -62,6 +79,8 @@
       "id": "DSC-07",
       "step": "S7",
       "description": "drift line printed",
+      "path": "/values/S7/drift_line_printed",
+      "required": true,
       "check": "exists",
       "expect": true
     }

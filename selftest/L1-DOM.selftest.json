@@ -1,8 +1,13 @@
 {
-  "schema": "l1-selftest/1.1",
+  "schema": "l1-selftest/1.3",
   "agent": "L1-DOM",
-  "agent_version": "1.2",
-  "verified_on": "2026-10-28",
+  "agent_version": "1.3.0",
+  "historical_baseline_date": "2026-10-28",
+  "validation": {
+    "live_provider_verified": false,
+    "host_matrix": [],
+    "scope": "Compares supplied observations; does not generate them or certify a host."
+  },
   "target": "example.com",
   "skip_steps": [
     "S9"
@@ -18,6 +23,8 @@
       "id": "DOM-01",
       "step": "S2",
       "description": "RDAP HTTP status",
+      "path": "/values/S2/rdap_http_status",
+      "required": true,
       "check": "equals",
       "expect": 200
     },
@@ -25,6 +32,8 @@
       "id": "DOM-02",
       "step": "S2",
       "description": "RDAP ldhName",
+      "path": "/values/S2/rdap_ldhname",
+      "required": true,
       "check": "equals",
       "expect": "EXAMPLE.COM"
     },
@@ -32,6 +41,8 @@
       "id": "DOM-03",
       "step": "S2",
       "description": "RDAP registration event date",
+      "path": "/values/S2/rdap_registration_event_date",
+      "required": true,
       "check": "equals",
       "expect": "1995-08-14T04:00:00Z"
     },
@@ -39,6 +50,8 @@
       "id": "DOM-04",
       "step": "S2",
       "description": "RDAP nameserver count",
+      "path": "/values/S2/rdap_nameserver_count",
+      "required": true,
       "check": "gte",
       "expect": 2,
       "may_drift": true,
@@ -48,25 +61,30 @@
       "id": "DOM-05",
       "step": "S3",
       "description": "NS answers agree between two DoH resolvers",
+      "path": "/values/S3/ns_answers_agree_between_two_doh_resolvers",
+      "required": true,
       "check": "equals",
       "expect": true
     },
     {
       "id": "DOM-06",
       "step": "S6",
-      "description": "MX answer is empty or the null MX '0 .'",
+      "description": "mail routing classification",
+      "path": "/values/S6/mail_routing_classification",
+      "required": true,
       "check": "in",
       "expect": [
-        [],
-        [
-          "0 ."
-        ]
+        "explicit_null_mx",
+        "no_mx_with_address_fallback",
+        "mx_present"
       ]
     },
     {
       "id": "DOM-07",
       "step": "S4",
       "description": "crt.sh certificate rows",
+      "path": "/values/S4/crt_sh_certificate_rows",
+      "required": true,
       "check": "gte",
       "expect": 10,
       "may_drift": true
@@ -75,6 +93,8 @@
       "id": "DOM-08",
       "step": "S7",
       "description": "home page HTTP status",
+      "path": "/values/S7/home_page_http_status",
+      "required": true,
       "check": "equals",
       "expect": 200
     },
@@ -82,6 +102,8 @@
       "id": "DOM-09",
       "step": "S7",
       "description": "home page title",
+      "path": "/values/S7/home_page_title",
+      "required": true,
       "check": "equals",
       "expect": "Example Domain"
     },
@@ -89,6 +111,8 @@
       "id": "DOM-10",
       "step": "S8",
       "description": "Wayback availability present",
+      "path": "/values/S8/wayback_availability_present",
+      "required": true,
       "check": "exists",
       "expect": true
     }

@@ -1,20 +1,34 @@
 #!/usr/bin/env python3
-"""Write selftest/<CODE>.selftest.json for every agent. Values verified live on 2026-10-28 from a sandbox."""
+"""Write machine-addressable self-test specs (no network or provider validation).
+
+Provider values inherited from v1.2 are historical baselines, not assertions that
+the endpoint, host or extraction method has been validated in this release.
+The runtime compares a separately supplied normalized observation document.
+"""
+import hashlib
 import json
+import re
 from pathlib import Path
+import tomllib
 
 OUT = Path(__file__).resolve().parent.parent / "selftest"
 OUT.mkdir(exist_ok=True)
-VERIFIED = "2026-10-28"
+BASELINE = "2026-10-28"
+VERSION = tomllib.loads((OUT.parent / "pyproject.toml").read_text(encoding="utf-8"))["project"]["version"]
 
 def spec(code, target, assertions, skip, notes, extra=None):
-    d = {"schema": "l1-selftest/1.1", "agent": code, "agent_version": "1.2", "verified_on": VERIFIED,
+    d = {"schema": "l1-selftest/1.3", "agent": code, "agent_version": VERSION, "historical_baseline_date": BASELINE,
+         "validation": {"live_provider_verified": False, "host_matrix": [],
+                        "scope": "Compares supplied observations; does not generate them or certify a host."},
          "target": target, "skip_steps": skip, "caps": {}, "sub_skips": {}, "intake_overrides": {}, "notes": notes, "assertions": assertions}
     if extra: d.update(extra)
     return d
 
-def A(id_, step, desc, check, expect, drift=False, **kw):
-    a = {"id": id_, "step": step, "description": desc, "check": check, "expect": expect}
+def A(id_, step, desc, check, expect, drift=False, path=None, required=True, **kw):
+    field = re.sub(r"[^a-z0-9]+", "_", desc.lower()).strip("_")
+    a = {"id": id_, "step": step, "description": desc,
+         "path": path or f"/values/{step}/{field}", "required": required,
+         "check": check, "expect": expect}
     if drift: a["may_drift"] = True
     a.update(kw); return a
 
@@ -26,7 +40,7 @@ S["L1-WEB"] = spec("L1-WEB", "https://example.com/", [
     A("WEB-04","S2","DNS A answers for example.com","gte",1,drift=True),
     A("WEB-05","S4","directly linked resources","equals",0),
     A("WEB-06","S6","Wayback closest snapshot timestamp","matches","^\\d{14}$",drift=True),
-    A("WEB-07","S7","volatility result","equals","STABLE"),
+    A("WEB-07","S7","text volatility result","equals","TEXT_UNCHANGED"),
 ], [], "example.com is IANA's reserved domain. Its DNS/hosting change occasionally; only counts and patterns are asserted for those.", {"sub_skips": {"S6": "creation of a new public snapshot"}})
 
 S["L1-DOM"] = spec("L1-DOM", "example.com", [
@@ -35,7 +49,7 @@ S["L1-DOM"] = spec("L1-DOM", "example.com", [
     A("DOM-03","S2","RDAP registration event date","equals","1995-08-14T04:00:00Z"),
     A("DOM-04","S2","RDAP nameserver count","gte",2,drift=True,note="names were elliott/hera.ns.cloudflare.com on the verification date"),
     A("DOM-05","S3","NS answers agree between two DoH resolvers","equals",True),
-    A("DOM-06","S6","MX answer is empty or the null MX '0 .'","in",[[],["0 ."]]),
+    A("DOM-06","S6","mail routing classification","in",["explicit_null_mx","no_mx_with_address_fallback","mx_present"]),
     A("DOM-07","S4","crt.sh certificate rows","gte",10,drift=True),
     A("DOM-08","S7","home page HTTP status","equals",200),
     A("DOM-09","S7","home page title","equals","Example Domain"),
@@ -59,10 +73,10 @@ S["L1-EML"] = spec("L1-EML", "selftest@example.com", [
     A("EML-01","S1","local part","equals","selftest"),
     A("EML-02","S1","domain","equals","example.com"),
     A("EML-03","S1","role address","equals",False),
-    A("EML-04","S2","MX answer is empty or null MX '0 .'","in",[[],["0 ."]]),
+    A("EML-04","S2","mail routing classification","in",["explicit_null_mx","no_mx_with_address_fallback","mx_present"]),
     A("EML-05","S2","RDAP registration date","equals","1995-08-14T04:00:00Z"),
     A("EML-06","S3","disposable classification","equals",False),
-    A("EML-07","S4","Gravatar avatar HTTP status for md5(selftest@example.com)","equals",404),
+    A("EML-07","S4","Gravatar SHA256 identifier","equals",hashlib.sha256(b"selftest@example.com").hexdigest()),
     A("EML-08","S5","HIBP step status without key","equals","DEFERRED", note="with an agency key, use account-exists@hibp-integration-tests.com and expect >= 1 breach"),
 ], ["S6","S7"], "No third-party sweep for a test address.", {"intake_overrides": {}})
 
@@ -85,7 +99,7 @@ S["L1-SOC"] = spec("L1-SOC", "https://bsky.app/profile/bsky.app", [
     A("SOC-04","S3","createdAt starts with","startswith","2023-04-12"),
     A("SOC-05","S2","profile page HTTP status","equals",200),
     A("SOC-06","S4","author feed items (limit 10)","gte",5, source="https://public.api.bsky.app/xrpc/app.bsky.feed.getAuthorFeed?actor=bsky.app&limit=10"),
-    A("SOC-07","S4","every feed item uri starts with","startswith","at://did:plc:z72i7hdynmk6r22z27h6tvur/"),
+    A("SOC-07","S4","feed item uris","all_startswith","at://did:plc:z72i7hdynmk6r22z27h6tvur/"),
     A("SOC-08","S9","drift line printed","exists",True),
 ], ["S5","S6"], "Bluesky exposes a public, keyless API, so this test works without a browser; the mode will be ASSISTED on hosts without CAP-BROWSER and that is expected.", {"intake_overrides": {"16": "10 most recent"}})
 
@@ -105,20 +119,17 @@ S["L1-IMG"] = spec("L1-IMG", "selftest/L1-IMG_selftest.jpg", [
     A("IMG-13","S1","perceptual hash computed","exists",True),
 ], ["S3","S5","S6","S7","S8"], "Fixture generated by build; hashes in selftest/FIXTURE_HASHES.json.", {"intake_overrides": {"16": "841ebfdeff6f682e748a9196f88dec69bfb2d0cd8150c9e4e09b73b40b4d109f"}})
 
-S["L1-CRY"] = spec("L1-CRY", "1A1zP1eP5QGefi2DMPTfTL5SLmv7DivfNa", [
+S["L1-CRY"] = spec("L1-CRY", "tests/fixtures/crypto-transactions.json", [
     A("CRY-01","S1","chain","equals","BTC"),
     A("CRY-02","S1","format","equals","P2PKH"),
     A("CRY-03","S1","base58check valid","equals",True),
-    A("CRY-04","S2","mempool.space HTTP status","equals",200),
-    A("CRY-05","S2","chain_stats.spent_txo_count","equals",0),
-    A("CRY-06","S2","chain_stats.funded_txo_count","gte",80000,drift=True),
-    A("CRY-07","S2","chain_stats.tx_count","gte",60000,drift=True),
-    A("CRY-08","S2","second explorer (blockchain.info rawaddr) n_tx","gte",60000,drift=True),
-    A("CRY-09","S3","earliest-100 export (fetched by offset): first transaction block height","equals",0),
-    A("CRY-10","S3","earliest-100 export: first transaction block time","equals","2009-01-03T18:15:05Z"),
-    A("CRY-11","S6","OFAC SDN CSV downloaded","equals",200),
-    A("CRY-12","S6","sanctions result","equals","NO MATCH"),
-], ["S5","S7","S8"], "Genesis coinbase address: its outputs are unspendable, so spent count is always 0; received counts only grow.", {"caps": {"S3": "most recent 100 plus earliest 100 (fetched by offset)"}})
+    A("CRY-04","S3","multi input fixture input count","equals",2),
+    A("CRY-05","S3","multi input fixture output count","equals",3),
+    A("CRY-06","S3","target net delta satoshi","equals",-62000),
+    A("CRY-07","S4","per counterparty allocation","equals","not established"),
+    A("CRY-08","S4","coverage","equals","sampled"),
+    A("CRY-09","S3","self transfer net delta satoshi","equals",-1000),
+], ["S2","S5","S6","S7","S8"], "Offline transaction fixtures avoid mutable explorer counts and the exceptional genesis-block subsidy. The fixture checks representation and target-address arithmetic only; provider capture and chain support need separate live smoke tests.")
 
 S["L1-ORG"] = spec("L1-ORG", "Apple Inc.", [
     A("ORG-01","S4","GLEIF HTTP status","equals",200, source="https://api.gleif.org/api/v1/lei-records/HWUPKR0MPOU8FGXBT394"),
@@ -126,7 +137,7 @@ S["L1-ORG"] = spec("L1-ORG", "Apple Inc.", [
     A("ORG-03","S4","legal name","equals","Apple Inc."),
     A("ORG-04","S4","jurisdiction","equals","US-CA"),
     A("ORG-05","S4","registration status","equals","ISSUED"),
-    A("ORG-06","S1","official register identified","contains","sec.gov"),
+    A("ORG-06","S1","SEC source authority","equals","securities_filings"),
     A("ORG-07","S2","EDGAR company page HTTP status after redirect","equals",200, note="EDGAR requires a descriptive User-Agent with a contact email"),
     A("ORG-08","S6","OFAC + UN list files downloaded","equals",200),
     A("ORG-09","S6","screening result","in",["NO MATCH","POTENTIAL MATCH (requires human review)"]),
@@ -142,7 +153,7 @@ S["L1-IPA"] = spec("L1-IPA", "1.1.1.1", [
     A("IPA-07","S4","PTR","equals","one.one.one.one"),
     A("IPA-08","S5","two geolocation providers responded","equals",True),
     A("IPA-09","S6","in Tor bulk exit list","equals",False),
-    A("IPA-10","S6","ExoneraTor page captured","exists",True),
+    A("IPA-10","S6","ExoneraTor resolution","equals","date"),
     A("IPA-11","S7","Shodan InternetDB hostnames contain","contains","one.one.one.one",drift=True),
     A("IPA-12","unit","validation routine applied to 192.168.1.1 (code only, no network)","equals","NOT-INVESTIGABLE"),
 ], ["S8","S9"], "Cloudflare's public resolver; registration and routing are stable.", {"intake_overrides": {"16": "2026-01-01T00:00:00Z"}})
@@ -195,12 +206,15 @@ S["L1-DSC"] = spec("L1-DSC", "https://discord.gg/discord-developers", [
     A("DSC-01","S2","invite JSON HTTP status","equals",200),
     A("DSC-02","S2","guild.name","equals","Discord Developers"),
     A("DSC-03","S2","guild.id","equals","613425648685547541"),
-    A("DSC-04","S1","Snowflake creation time of guild id","equals","2019-08-20T17:34:31Z"),
+    A("DSC-04","S1","Snowflake creation time of confirmed guild id milliseconds","equals","2019-08-20T17:34:31.544Z"),
     A("DSC-05","S2","approximate_member_count","gte",100000,drift=True),
     A("DSC-06","S3","widget HTTP status","in",[200,403]),
     A("DSC-07","S7","drift line printed","exists",True),
 ], ["S6"], "Discord's official developer server.")
 
 for code, d in S.items():
-    (OUT / f"{code}.selftest.json").write_text(json.dumps(d, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
+    paths = [a["path"] for a in d["assertions"]]
+    if len(paths) != len(set(paths)):
+        raise ValueError(f"{code}: duplicate observed-value selectors")
+    (OUT / f"{code}.selftest.json").write_text(json.dumps(d, indent=2, ensure_ascii=False) + "\n", encoding="utf-8", newline="\n")
     print("wrote", code, len(d["assertions"]), "assertions")
