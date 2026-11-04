@@ -1,6 +1,6 @@
 # agentic-OSINT documentation
 
-Version 1.3.3 provides seventeen supervised procedures and a local toolkit for supported evidence operations. Start with harmless data and inspect actual outputs. Prompt instructions alone do not enforce permissions or guarantee correct findings.
+Version 1.3.4 provides seventeen supervised procedures and a local toolkit for supported evidence operations. Start with harmless data and inspect actual outputs. Prompt instructions alone do not enforce permissions or guarantee correct findings.
 
 | Read this | For |
 |---|---|

@@ -256,7 +256,8 @@ def capture(root: Path, url: str, *, third_party: bool = False, fetcher=None) ->
                 set_step(case, "acquisition", "FAILED")
                 save_state(root, case, "capture_failed", details={"evidence_id": item["id"], "error_type": type(error).__name__, "partial": True})
             else:
-                append_event(root, "capture_failed", "local-tool", {"error_type": type(error).__name__, "state_sha256": digest(canonical(case))})
+                set_step(case, "acquisition", "FAILED")
+                save_state(root, case, "capture_failed", details={"error_type": type(error).__name__, "partial": False})
             raise
         append_event(root, "network_budget_settled", "local-tool", {"requests": -(remaining - len(result.hops)),
                      "requests_observed": len(result.hops), "state_sha256": digest(canonical(case))})

@@ -1,6 +1,6 @@
 # Onion Service (Tor Hidden Service) Capture Agent
 
-**Agent code:** L1-ONI · **File:** `12_L1-ONI_Onion-Service-Capture.md` · **Class:** Level-1 OSINT procedure · **Version:** 1.3.3 (2026-11) · **Published at:** github.com/ZvonkoNS/agentic-OSINT
+**Agent code:** L1-ONI · **File:** `12_L1-ONI_Onion-Service-Capture.md` · **Class:** Level-1 OSINT procedure · **Version:** 1.3.4 (2026-11) · **Published at:** github.com/ZvonkoNS/agentic-OSINT
 
 **Purpose:** Preserve one page of a Tor onion service as evidence through the Investigator's own Tor Browser, with the agent validating the address, guiding and documenting every capture, and hashing the result — the agent itself never touches the Tor network.
 
@@ -497,4 +497,4 @@ G1/G2: disclosed scope/policy. G3: specific browser actions. G4: specific change
 
 Artifact: saved bytes with acquisition/derivation record. Claim: supported source-value observation, negative result, traceable calculation or separately reviewed analysis. Integrity: byte equality to a recorded expectation, not truth. Coverage: declared required scope actually acquired. Lead: unverified item for separately authorized work. Timestamp: attestation of specific bytes under stated trust/validation conditions. Custody: actor/location transfer record with assurance actually demonstrated. Provisional: binding, bytes or checks remain incomplete.
 
-*End of agent file L1-ONI v1.3.3.*
+*End of agent file L1-ONI v1.3.4.*

@@ -166,6 +166,7 @@ class RuntimeReviewTests(unittest.TestCase):
         rows = event_rows(root)
         self.assertEqual(sum(row["details"].get("requests", 0) for row in rows), 2)
         self.assertEqual(sum(row["action"] == "capture_failed" for row in rows), 2)
+        self.assertEqual(next(step for step in load_case(root)["steps"] if step["id"] == "acquisition")["status"], "FAILED")
         with self.assertRaisesRegex(ValueError, "budget exhausted"):
             capture(root, url)
 

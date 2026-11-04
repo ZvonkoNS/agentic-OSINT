@@ -1,5 +1,9 @@
 # Changelog
 
+## v1.3.4 — 2026-11-04
+
+- Mark acquisition failed when a capture stops before receiving any response, while retaining the failure event.
+
 ## v1.3.3 — 2026-11-04
 
 - Settle a failed built-in network capture against recorded transport attempts, charging at least one attempt for DNS failure while keeping unknown or interrupted reservations conservative.
