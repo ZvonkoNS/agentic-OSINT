@@ -10,9 +10,9 @@ On 2026-11-04 the v1.3.0 working tree's documented local demo and manual JSON-va
 | Windows | Local Python and artifact checks | Windows CI exercises supported release checks; explicit text/binary rules protect bytes |
 | Linux | Local Python and artifact checks | Linux CI exercises the same release checks; artifact equivalence is checked, not assumed |
 | macOS | Python command-line use | No dedicated macOS CI or operational validation is claimed |
-| ChatGPT | Supervised procedure guidance | No end-to-end host/model/version benchmark is published |
+| ChatGPT | Supervised procedure guidance | A single L1-WEB evaluation was started on 2026-11-04; see [host smoke test](HOST-SMOKE-TEST-2026-11-04.md). No complete host benchmark is claimed. |
 | Claude | Supervised procedure guidance | No end-to-end host/model/version benchmark is published |
-| Gemini | Supervised procedure guidance | No end-to-end host/model/version benchmark is published |
+| Gemini | Supervised procedure guidance | A single L1-WEB evaluation on 2026-11-04 was incomplete and exposed unsupported coverage claims; see [host smoke test](HOST-SMOKE-TEST-2026-11-04.md). No complete host benchmark is claimed. |
 | Microsoft Copilot | Supervised procedure guidance | No end-to-end host/model/version benchmark is published |
 | Local/self-hosted models | Procedures with explicitly configured tools | No general compatibility or compliance guarantee |
 | Browser tools | Supervised acquisition with saved artifacts | Save/download paths, logged-out state, screenshots and subresources need host-specific checks |

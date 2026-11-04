@@ -1,6 +1,6 @@
 # Web Page Evidence Capture Agent
 
-**Agent code:** L1-WEB · **File:** `01_L1-WEB_Web-Page-Evidence-Capture.md` · **Class:** Level-1 OSINT procedure · **Version:** 1.3.0 (2026-11) · **Published at:** github.com/ZvonkoNS/agentic-OSINT
+**Agent code:** L1-WEB · **File:** `01_L1-WEB_Web-Page-Evidence-Capture.md` · **Class:** Level-1 OSINT procedure · **Version:** 1.3.1 (2026-11) · **Published at:** github.com/ZvonkoNS/agentic-OSINT
 
 **Purpose:** Preserve one publicly accessible web page (post, article, listing, profile page, document) with its redirect chain, selected linked media, metadata and explicitly bounded change checks for investigator review.
 
@@ -453,7 +453,7 @@ Record as `L-nnn` (never act on): other pages on the same site, the domain profi
 
 ### 9.10 Self-test specification
 
-The versioned `selftest/L1-WEB.selftest.json` is the machine-readable assertion contract. Missing required observations, fixtures or adapters yield INCOMPLETE, never PASS. Required offline regression scenarios include a page whose visible text is unchanged but image bytes change: text remains `TEXT_UNCHANGED`, the selected image is `CHANGED`, and unchecked resources remain `NOT_CHECKED`; deterministic resource selection; redirect rejection; and a rounded relative date without an invented exact timestamp. Optional live smoke target: `https://example.com/`; record status, title, redirects and each comparison dimension as observed. Availability, DNS, archive results and live change results are not fixed guarantees. `skip: S6 snapshot creation`.
+The versioned `selftest/L1-WEB.selftest.json` is the machine-readable assertion contract. Missing required observations, fixtures or adapters yield INCOMPLETE, never PASS. Required offline regression scenarios include a page whose visible text is unchanged but image bytes change: text remains `TEXT_UNCHANGED`, the selected image is `CHANGED`, and unchecked resources remain `NOT_CHECKED`; deterministic resource selection; redirect rejection; and a rounded relative date without an invented exact timestamp. Optional live smoke target: `https://example.com/`; record status, title, redirects and each comparison dimension as observed. Availability, DNS, archive results and live change results are not fixed guarantees. Skip only creation of a new S6 snapshot; the read-only Wayback availability lookup remains a separate required assertion when running this live smoke test. If it cannot be queried, record it as unavailable rather than skipped by this instruction. For S4 count only media and document resources, not ordinary navigation links, and do not infer a zero count from a search snippet or partial transcript.
 
 ### 9.11 Lawful-request mapping
 
@@ -470,6 +470,8 @@ Typical FULL-mode duration: 8–15 minutes; longer when there are many linked fi
 ## 10. SELFTEST
 
 SELFTEST is a harmless functional exercise, not host reliability/conformance proof. Run the shipped offline suite and explicitly selected provider smoke tests through the documented runner. Pin expectations/fixture hashes to this immutable release/commit, never moving main. Missing required expectations, selectors, fixtures or checks mean INCOMPLETE/NOT CHECKED, never PASS.
+
+Do not claim a test validated procedural logic or safeguards merely because an answer followed the prompt. Distinguish observed actions and artifacts from model-generated assertions. A search snippet or transformed reader transcript cannot establish that a page has no images, documents, metadata or other omitted elements; mark enumeration and absence checks INCOMPLETE unless an adequate captured representation was actually inspected. A skipped sub-step does not skip its parent step or other required checks. Report each unperformed operation and its reason separately.
 
 Use minimum dummy data; show test scope/destinations/permissions and apply G1/G2. Do not auto-authorize every optional upload/timestamp/disclosure. Tests that skip browser/media paths state that those paths remain untested. Every pack is labeled `SELFTEST — NOT CASE EVIDENCE`.
 
@@ -495,4 +497,4 @@ G1/G2: disclosed scope/policy. G3: specific browser actions. G4: specific change
 
 Artifact: saved bytes with acquisition/derivation record. Claim: supported source-value observation, negative result, traceable calculation or separately reviewed analysis. Integrity: byte equality to a recorded expectation, not truth. Coverage: declared required scope actually acquired. Lead: unverified item for separately authorized work. Timestamp: attestation of specific bytes under stated trust/validation conditions. Custody: actor/location transfer record with assurance actually demonstrated. Provisional: binding, bytes or checks remain incomplete.
 
-*End of agent file L1-WEB v1.3.0.*
+*End of agent file L1-WEB v1.3.1.*

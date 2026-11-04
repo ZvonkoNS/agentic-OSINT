@@ -1,5 +1,10 @@
 # Changelog
 
+## v1.3.1 — 2026-11-04
+
+- Clarify that partial search transcripts cannot establish exhaustive resource enumeration, and that skipping new archive creation does not skip the read-only availability lookup.
+- Require host evaluations to distinguish observed artifacts from model assertions about successful validation.
+
 ## v1.3.0 — 2026-11-04
 
 - Add a local toolkit for supported evidence operations; distinguish executable checks from supervised prompt procedures.

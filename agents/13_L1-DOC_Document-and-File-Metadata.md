@@ -1,6 +1,6 @@
 # Document & File Metadata Agent
 
-**Agent code:** L1-DOC · **File:** `13_L1-DOC_Document-and-File-Metadata.md` · **Class:** Level-1 OSINT procedure · **Version:** 1.3.0 (2026-11) · **Published at:** github.com/ZvonkoNS/agentic-OSINT
+**Agent code:** L1-DOC · **File:** `13_L1-DOC_Document-and-File-Metadata.md` · **Class:** Level-1 OSINT procedure · **Version:** 1.3.1 (2026-11) · **Published at:** github.com/ZvonkoNS/agentic-OSINT
 
 **Purpose:** Establish the identity, structure, embedded metadata, revision traces, embedded objects and extractable identifiers of one document or file (PDF, Office, OpenDocument, archive, plain text) without executing anything inside it.
 
@@ -475,6 +475,8 @@ Typical FULL-mode duration: 8–15 minutes for a single Office or PDF file; long
 
 SELFTEST is a harmless functional exercise, not host reliability/conformance proof. Run the shipped offline suite and explicitly selected provider smoke tests through the documented runner. Pin expectations/fixture hashes to this immutable release/commit, never moving main. Missing required expectations, selectors, fixtures or checks mean INCOMPLETE/NOT CHECKED, never PASS.
 
+Do not claim a test validated procedural logic or safeguards merely because an answer followed the prompt. Distinguish observed actions and artifacts from model-generated assertions. A search snippet or transformed reader transcript cannot establish that a page has no images, documents, metadata or other omitted elements; mark enumeration and absence checks INCOMPLETE unless an adequate captured representation was actually inspected. A skipped sub-step does not skip its parent step or other required checks. Report each unperformed operation and its reason separately.
+
 Use minimum dummy data; show test scope/destinations/permissions and apply G1/G2. Do not auto-authorize every optional upload/timestamp/disclosure. Tests that skip browser/media paths state that those paths remain untested. Every pack is labeled `SELFTEST — NOT CASE EVIDENCE`.
 
 Expected specs use `l1-selftest/1.3`; each assertion has JSON Pointer `path`, `required`, `check`, `expect`, and optional `may_drift`. Observed records use `agentic-osint/observations/1.3` with `values` and availability keyed by assertion ID (`OBSERVED`, `BLOCKED`, `NOT_RUN`, `ERROR`). Record actual output, not an expected value copied into an observation. Follow the shipped schema/runner for exact fields; do not create a private incompatible variant.
@@ -499,4 +501,4 @@ G1/G2: disclosed scope/policy. G3: specific browser actions. G4: specific change
 
 Artifact: saved bytes with acquisition/derivation record. Claim: supported source-value observation, negative result, traceable calculation or separately reviewed analysis. Integrity: byte equality to a recorded expectation, not truth. Coverage: declared required scope actually acquired. Lead: unverified item for separately authorized work. Timestamp: attestation of specific bytes under stated trust/validation conditions. Custody: actor/location transfer record with assurance actually demonstrated. Provisional: binding, bytes or checks remain incomplete.
 
-*End of agent file L1-DOC v1.3.0.*
+*End of agent file L1-DOC v1.3.1.*

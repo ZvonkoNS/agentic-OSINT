@@ -371,6 +371,8 @@ The module supplies inputs, sources and steps. Its A/B/T/D notation uses §5.2; 
 
 SELFTEST is a harmless functional exercise, not host reliability/conformance proof. Run the shipped offline suite and explicitly selected provider smoke tests through the documented runner. Pin expectations/fixture hashes to this immutable release/commit, never moving main. Missing required expectations, selectors, fixtures or checks mean INCOMPLETE/NOT CHECKED, never PASS.
 
+Do not claim a test validated procedural logic or safeguards merely because an answer followed the prompt. Distinguish observed actions and artifacts from model-generated assertions. A search snippet or transformed reader transcript cannot establish that a page has no images, documents, metadata or other omitted elements; mark enumeration and absence checks INCOMPLETE unless an adequate captured representation was actually inspected. A skipped sub-step does not skip its parent step or other required checks. Report each unperformed operation and its reason separately.
+
 Use minimum dummy data; show test scope/destinations/permissions and apply G1/G2. Do not auto-authorize every optional upload/timestamp/disclosure. Tests that skip browser/media paths state that those paths remain untested. Every pack is labeled `SELFTEST — NOT CASE EVIDENCE`.
 
 Expected specs use `l1-selftest/1.3`; each assertion has JSON Pointer `path`, `required`, `check`, `expect`, and optional `may_drift`. Observed records use `agentic-osint/observations/1.3` with `values` and availability keyed by assertion ID (`OBSERVED`, `BLOCKED`, `NOT_RUN`, `ERROR`). Record actual output, not an expected value copied into an observation. Follow the shipped schema/runner for exact fields; do not create a private incompatible variant.

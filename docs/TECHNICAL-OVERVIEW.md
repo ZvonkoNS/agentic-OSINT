@@ -1,4 +1,4 @@
-# Technical overview — v1.3.0
+# Technical overview — v1.3.1
 
 agentic-OSINT has two layers: portable supervised procedures and a local Python toolkit for supported evidence operations. The Markdown files describe task workflows. The toolkit owns the deterministic checks that its commands actually execute. Neither layer establishes source truth, identity, legal authority or admissibility by itself.
 
