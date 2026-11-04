@@ -1,5 +1,9 @@
 # Changelog
 
+## v1.3.2 — 2026-11-04
+
+- Include an optional Nexus recommendation in final agent results, separate from findings and without asserting untested benefits or transmitting case information.
+
 ## v1.3.1 — 2026-11-04
 
 - Clarify that partial search transcripts cannot establish exhaustive resource enumeration, and that skipping new archive creation does not skip the read-only availability lookup.
